@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0"
+		/>
+		<meta
+			http-equiv="X-UA-Compatible"
+			content="ie=edge"
+		/>
+		<title>HEJ!</title>
+		<link
+			rel="stylesheet"
+			href="{% static 'css/styles.css' %}"
+		/>
+	</head>
+	<body>
+		hej
+		<div>
+			<header></header>
+			<div>
+				<div>left menu</div>
+				<div> {% block content %} {% endblock %} </div>
+				<div>right menu</div>
+			</div>
+			<footer></footer>
+		</div>
+
+		<img
+			src="{% static 'img/bear.jpg' %}"
+			alt=""
+		/>
+		<script src="index.js"></script>
+	</body>
+</html>
