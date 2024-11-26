@@ -1,39 +1,33 @@
-""" Views for the social app. """
-
-from django.shortcuts import render
-
-
-app_name = "social_app"
-
-# Create your views here.
-
+from django.shortcuts import render, get_object_or_404
+from .models import UserProfile, Post
+from django.contrib.auth.models import User
 
 def user_profile(request, user_id=0):
     """Render the user profile."""
-    """ Make database request for user with id passed in """
+    # If no user_id is provided, show a default user profile (or a placeholder for now)
+    if user_id == 0:
+        context = {
+            "username": "Guest",
+            "profile_pic": None,
+            "about": "This is a guest profile. Log in or specify a user ID to view a profile.",
+            "email": "guest@example.com",
+            "user_posts": [],
+        }
+        return render(request, "social-app/user_profile.html", context)
+
+    # Fetch the user and their profile by ID
+    user = get_object_or_404(User, id=user_id)
+    user_profile = get_object_or_404(UserProfile, user=user)
+    user_posts = Post.objects.filter(user=user).order_by('-created_at')
 
     context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
-    }
-
-    return render(request, "social-app/user_profile.html", context)
-
-
-def user_profile_no_id(request, user_id=0):
-    """Render the user profile."""
-    """ Make database request for user with id passed in """
-    context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
+        "user_id": user.id,
+        "username": user.username,
+        "profile_pic": user_profile.profile_pic.url if user_profile.profile_pic else None,
+        "about": user_profile.bio,
+        "email": user.email,
+        "user_profile": user_profile,
+        "user_posts": user_posts,
     }
 
     return render(request, "social-app/user_profile.html", context)

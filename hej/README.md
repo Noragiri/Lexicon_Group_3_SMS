@@ -46,8 +46,3 @@ git rebase main
 After that make sure the project works/looks OK.
 
 Now you are ready to merge!
-
-
- - check current branch : git branch --show-current
- - create new branch : git checkout -b branch_name
- 
