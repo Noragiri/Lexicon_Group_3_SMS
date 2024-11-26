@@ -37,6 +37,9 @@ When you are done with your feature branch change your PR to **"Ready for review
 When pullrequest is ready for merge standing on your feature branch run:
 
 ```bash
+git checkout main
+git pull
+git checkout 26-add-to-readmemd
 git rebase main
 ```
 
