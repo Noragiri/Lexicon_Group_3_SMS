@@ -5,6 +5,11 @@
 /package.json
 /node_modules
 
+
+/pycache/*
+__pycache__/** 
+
+
 # Created by https://www.gitignore.io
 
 ### OSX ###
