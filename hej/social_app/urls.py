@@ -12,7 +12,8 @@ from social_app.views import (
 app_name = "social_app"
 
 urlpatterns = [
-    path("profile/", user_profile, name="user_profile"),
+    path("", temporary_startpage, name="home"),
+    path("user_profile/", user_profile, name="user_profile_my_profile"),
     path("user_profile/<int:user_id>/", user_profile, name="user_profile"),
     path("followers/", followers, name="followers"),
     path("following/", following, name="following"),
