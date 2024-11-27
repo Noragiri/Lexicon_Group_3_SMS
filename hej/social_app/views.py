@@ -2,6 +2,11 @@ from django.shortcuts import render, get_object_or_404
 from .models import UserProfile, Post
 from django.contrib.auth.models import User
 
+def temporary_startpage(request):
+    """Render the temporary startpage."""
+    return render(request, "social-app/temporary_startpage.html")
+
+
 def user_profile(request, user_id=0):
     """Render the user profile."""
     # If no user_id is provided, show a default user profile (or a placeholder for now)
@@ -31,3 +36,18 @@ def user_profile(request, user_id=0):
     }
 
     return render(request, "social-app/user_profile.html", context)
+
+
+def followers(request):
+    """Render the search page."""
+    return render(request, "social-app/followers.html")
+
+
+def following(request):
+    """Render the search page."""
+    return render(request, "social-app/following.html")
+
+
+def search(request):
+    """Render the search page."""
+    return render(request, "social-app/search.html")
