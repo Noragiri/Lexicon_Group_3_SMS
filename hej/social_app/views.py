@@ -197,11 +197,6 @@ def following(request):
     return render(request, "social-app/following.html")
 
 
-def search(request):
-    """Render the search page."""
-    return render(request, "social-app/search.html")
-
-
 def register(request):
     registered = False
 
@@ -413,12 +408,7 @@ def search_user(request):
 
         # using Query tool to add multiple quries to get data from model
         # based on first name or last name enetered in search box.
-        multiple_q = Q(
-            Q(first_name__icontains=search_query)
-            | Q(username__icontains=search_query)
-            | Q(last_name__icontains=search_query)
-        )
-        data = User.objects.filter(multiple_q)
+        data = User.objects.filter(Q(username__icontains=search_query))
 
         context = {"data": data}
         print("data", data)

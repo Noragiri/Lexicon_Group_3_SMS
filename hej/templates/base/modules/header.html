@@ -21,8 +21,10 @@
 				</li>
 			</ul>
 			<!-- Search form -->
-			<form action="search" class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3 d-flex" role="search">
-				<input type="search" class="form-control me-2" placeholder="Search..." aria-label="Search" />
+			<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3 d-flex" role="search"
+				action="{% url 'social_app:search_user' %}" method="get">
+				<input type="search" class="form-control me-2" name='SearchQuery' placeholder="Search User"
+					aria-label="Search" />
 				<button type="submit" class="btn btn-primary">Search</button>
 			</form>
 
