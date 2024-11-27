@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content  %}
+<div class="container">
+
+    {% for data in data %}
+    <p>username :{{data.username}}</p>
+    <p>user_id: {{data.id}}</p>
+    <a href="{% url 'social_app:temp_profile' %}">{{data.username}}</a>
+    <p>first name  :{{data.first_name}} </p>
+    {% endfor%}
+
+
+</div>
+{% csrf_token %}
+{% endblock content %}
+
+
