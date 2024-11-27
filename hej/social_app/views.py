@@ -43,7 +43,7 @@ def user_profile(request, user_id=0):
         "email": user.email,
         "user_profile": user_profile,
         "user_posts": user_posts,
-
+    }
 
     # Fake data just added to display something
 
@@ -131,7 +131,6 @@ def user_profile_no_id(request, user_id=0):
         "about": "I am a software engineer.",
         "email": "hej@hej.com",
         "posts": fakeposts,
-
     }
 
     return render(request, "social-app/user_profile.html", context)

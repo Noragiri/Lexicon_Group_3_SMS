@@ -7,9 +7,11 @@
 	<div class="row align-items-center">
 		<div class="col-md-3 text-center">
 			{% if profile_pic %}
-			<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover" />
+			<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+				style="width: 150px; height: 150px; object-fit: cover" />
 			{% else %}
-			<img src="{% static 'img/default.jpg' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover" />
+			<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
+				style="width: 150px; height: 150px; object-fit: cover" />
 			{% endif %}
 		</div>
 		<div class="col-md-9">
@@ -31,7 +33,8 @@
 				<div class="list-group-item">
 					<p class="mb-1">{{ post.content }}</p>
 					{% if post.image %}
-					<img src="{{ post.image.url }}" class="img-fluid rounded mb-2" alt="Post Image" style="max-height: 200px; object-fit: cover" />
+					<img src="{{ post.image.url }}" class="img-fluid rounded mb-2" alt="Post Image"
+						style="max-height: 200px; object-fit: cover" />
 					{% endif %}
 					<small class="text-muted">Posted on {{ post.created_at }}</small>
 				</div>
