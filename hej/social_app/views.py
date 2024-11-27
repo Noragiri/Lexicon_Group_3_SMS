@@ -1,8 +1,12 @@
 """ Views for the social app. """
 
-from django.shortcuts import render, get_object_or_404
-from .models import UserProfile, Post
+from django.shortcuts import render, get_object_or_404, redirect
+from social_app.models import UserProfile, Post
 from django.contrib.auth.models import User
+from social_app.forms import UserForm, UserProfileInfoForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
 
 app_name = "social_app"
 
@@ -196,3 +200,61 @@ def following(request):
 def search(request):
     """Render the search page."""
     return render(request, "social-app/search.html")
+
+
+def register(request):
+    registered = False
+
+    if request.method == "POST":
+        user_form = UserForm(data=request.POST)
+        profile_form = UserProfileInfoForm(data=request.POST)
+
+        if user_form.is_valid() and profile_form.is_valid():
+
+            user = user_form.save()
+            user.set_password(user.password)
+            user.save()
+
+            profile = profile_form.save(commit=False)
+            profile.user = user
+
+            if "profile_picture" in request.FILES:
+                profile.profile_picture = request.FILES["profile_picture"]
+
+            profile.save()
+
+            registered = True
+
+        else:
+            print(user_form.errors, profile_form.errors)
+    else:
+        user_form = UserForm()
+        profile_form = UserProfileInfoForm()
+
+    return render(
+        request,
+        "social-app/registration.html",
+        {
+            "user_form": user_form,
+            "profile_form": profile_form,
+            "registered": registered,
+        },
+    )
+
+
+def login_view(request):
+    if request.method == "POST":
+        username = request.POST["username"]
+        password = request.POST["password"]
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect("/")  # Redirect to your homepage or dashboard
+        else:
+            messages.error(request, "Invalid username or password")
+    return render(request, "social-app/login.html")
+
+
+def custom_logout_view(request):
+    logout(request)  # Logs out the user
+    return redirect("social_app:login")  # Redirect to the homepage (or another page)

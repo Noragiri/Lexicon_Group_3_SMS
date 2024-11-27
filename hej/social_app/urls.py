@@ -7,6 +7,9 @@ from social_app.views import (
     followers,
     following,
     temporary_startpage,
+    register,
+    login_view,
+    custom_logout_view,
 )
 
 app_name = "social_app"
@@ -22,4 +25,7 @@ urlpatterns = [
     path("followers/", followers, name="followers"),
     path("following/", following, name="following"),
     path("search/", search, name="search"),
+    path("register/", register, name="register"),
+    path("login/", login_view, name="login"),
+    path("logout/", custom_logout_view, name="logout"),
 ]
