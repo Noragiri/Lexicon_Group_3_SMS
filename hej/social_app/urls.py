@@ -3,10 +3,11 @@
 from django.urls import path
 from social_app.views import (
     user_profile,
-    search,
     followers,
     following,
     temporary_startpage,
+    search_user,
+    temp_profile,
 )
 
 app_name = "social_app"
@@ -21,5 +22,8 @@ urlpatterns = [
     path("user_profile/<int:user_id>/", user_profile, name="user_profile"),
     path("followers/", followers, name="followers"),
     path("following/", following, name="following"),
-    path("search/", search, name="search"),
+    path("search/", search_user, name="search_user"),
+    path("search/temp/", temp_profile, name="temp_profile"),
 ]
+
+
