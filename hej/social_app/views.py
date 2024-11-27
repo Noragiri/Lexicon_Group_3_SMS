@@ -16,6 +16,7 @@ def temporary_startpage(request):
 
 def user_profile(request, user_id=0):
     """Render the user profile."""
+
     # If no user_id is provided, show a default user profile (or a placeholder for now)
     if user_id == 0:
         context = {
@@ -42,6 +43,95 @@ def user_profile(request, user_id=0):
         "email": user.email,
         "user_profile": user_profile,
         "user_posts": user_posts,
+
+
+    # Fake data just added to display something
+
+    fakeposts = [
+        {
+            "post_id": 1,
+            "name": "Name Namesson",
+            "date": "2024-12-04",
+            "message": "Oyeah this and that",
+        },
+        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
+        {
+            "post_id": 2,
+            "name": "John Smith",
+            "date": "2024-12-06",
+            "message": "Yet another post content",
+        },
+        {
+            "post_id": 3,
+            "name": "Name Namesson",
+            "date": "2024-12-04",
+            "message": "Oyeah this and that",
+        },
+        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
+        {
+            "post_id": 4,
+            "name": "John Smith",
+            "date": "2024-12-06",
+            "message": "Yet another post content",
+        },
+    ]
+
+    context = {
+        "user_id": user_id,
+        "username": "Alice",
+        "password": "password",
+        "profile_pic": "https://www.fillmurray.com/200/300",
+        "about": "I am a software engineer.",
+        "email": "hej@hej.com",
+        "posts": fakeposts,
+    }
+
+    return render(request, "social-app/user_profile.html", context)
+
+
+def user_profile_no_id(request, user_id=0):
+    """Render the user profile."""
+
+    # Fake data just added to display something
+
+    fakeposts = [
+        {
+            "post_id": 1,
+            "name": "Name Namesson",
+            "date": "2024-12-04",
+            "message": "Oyeah this and that",
+        },
+        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
+        {
+            "post_id": 2,
+            "name": "John Smith",
+            "date": "2024-12-06",
+            "message": "Yet another post content",
+        },
+        {
+            "post_id": 3,
+            "name": "Name Namesson",
+            "date": "2024-12-04",
+            "message": "Oyeah this and that",
+        },
+        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
+        {
+            "post_id": 4,
+            "name": "John Smith",
+            "date": "2024-12-06",
+            "message": "Yet another post content",
+        },
+    ]
+
+    context = {
+        "user_id": user_id,
+        "username": "Alice",
+        "password": "password",
+        "profile_pic": "https://www.fillmurray.com/200/300",
+        "about": "I am a software engineer.",
+        "email": "hej@hej.com",
+        "posts": fakeposts,
+
     }
 
     return render(request, "social-app/user_profile.html", context)
