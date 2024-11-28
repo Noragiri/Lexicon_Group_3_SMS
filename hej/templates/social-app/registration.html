@@ -1,23 +1,25 @@
-{% extends "base/base_logged_out.html" %} {% load static %} {% block content %} {% if not registered %}
+{% extends "base/base_logged_out.html" %} {% load static %} {% block content %} {% if registered %}
+<h1>Thank you for registering!</h1>
+{% else %}
 
-<div class="container-fluid vh-100">
-	<div class="row h-100">
-		<div class="col-md-6 bg-dark"></div>
-		<div class="col-md-6 bg-secondary text-white">
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
+	<div class="row">
+		<div class="col text-center">
+			<img src="{% static 'img/hej-logo.svg' %}" alt="Hej!" width="64" height="64" class="mb-2" />
+			<h1 class="mb-4">Register</h1>
 			<form enctype="multipart/form-data" method="POST">
 				{% csrf_token %} {{ user_form.as_p }} {{ profile_form.as_p }}
 				<input type="submit" value="Register" />
 			</form>
-		</div>
-	</div>
-</div>
-{% else %}
-<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
-	<div class="row">
-		<div class="col text-center">
-			<h1>Thank you for registering!</h1>
-			<p>Now you can <a href="{% url 'social_app:login' %}">login</a> to your account.</p>
-			<p>Or go back to the <a href="{% url 'social_app:feed' %}">feed</a>.</p>
+			{% if messages %}
+			<ul>
+				{% for message in messages %}
+				<li>{{ message }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+
+			<p>Don't have an account? <a href="{% url 'social_app:register' %}">Register</a></p>
 		</div>
 	</div>
 </div>

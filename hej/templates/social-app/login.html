@@ -1,23 +1,27 @@
 {% extends "base/base_logged_out.html" %} {% load static %} {% block content %}
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
+	<div class="row">
+		<div class="col text-center">
+			<img src="{% static 'img/hej-logo.svg' %}" alt="Hej!" width="64" height="64" class="mb-2" />
+			<h1 class="mb-4">Login</h1>
+			<form method="post">
+				{% csrf_token %}
+				<label for="username">Username:</label>
+				<input type="text" name="username" id="username" required /><br /><br />
+				<label for="password">Password:</label>
+				<input type="password" name="password" id="password" required /><br /><br />
+				<button type="submit" class="btn btn-primary">Login</button>
+			</form>
+			{% if messages %}
+			<ul>
+				{% for message in messages %}
+				<li>{{ message }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
 
-<div class="jumbotron">
-	<h1>Login</h1>
-	<form method="post">
-		{% csrf_token %}
-		<label for="username">Username:</label>
-		<input type="text" name="username" id="username" required /><br /><br />
-		<label for="password">Password:</label>
-		<input type="password" name="password" id="password" required /><br /><br />
-		<button type="submit">Login</button>
-	</form>
-	<p>Don't have an account? <a href="{% url 'social_app:register' %}">Register</a></p>
-	{% if messages %}
-	<ul>
-		{% for message in messages %}
-		<li>{{ message }}</li>
-		{% endfor %}
-	</ul>
-	{% endif %}
+			<p>Don't have an account? <a href="{% url 'social_app:register' %}">Register</a></p>
+		</div>
+	</div>
 </div>
-
 {% endblock %}
