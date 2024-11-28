@@ -425,9 +425,9 @@ def search_user(request):
 
 
 def temp_profile(request):
-    temp_profile = User.objects.get(pk=1)
+    temp_profile_list = User.objects.get(pk=1)
     print("temp_profile")
-    context = {"temp_profile": temp_profile}
+    context = {"temp_profile_list": temp_profile_list}
     return render(
         request, template_name="social-app/temp_profile.html", context=context
     )
