@@ -17,24 +17,18 @@ app_name = "social_app"
 
 
 @login_required
-def user_profile(request, user_id=0):
+def user_profile(request, user_id=None):
     """Render the user profile."""
 
-    # If no user_id is provided, show a default user profile (or a placeholder for now)
-    if user_id == 0:
-        context = {
-            "username": "Guest",
-            "profile_pic": None,
-            "about": "This is a guest profile. Log in or specify a user ID to view a profile.",
-            "email": "guest@example.com",
-            "user_posts": [],
-        }
-        return render(request, "social-app/user_profile.html", context)
+    # If no user_id is provided, use the logged-in user's profile
+    if user_id is None:
+        user = request.user
+    else:
+        user = get_object_or_404(User, id=user_id)
 
-    # Fetch the user and their profile by ID
-    user = get_object_or_404(User, id=user_id)
+    # Fetch the user's profile and posts
     user_profile_info = get_object_or_404(UserProfile, user=user)
-    user_posts = Post.objects.filter(user=user).order_by("-created_at")
+    user_posts = Post.objects.filter(user=user_profile_info).order_by("-created_at")
 
     context = {
         "user_id": user.id,
