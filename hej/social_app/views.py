@@ -20,73 +20,30 @@ app_name = "social_app"
 def user_profile(request, user_id=0):
     """Render the user profile."""
 
-    # If no user_id is provided, show a default user profile (or a placeholder for now)
+    #If no user_id is provided, show a default user profile (or a placeholder for now)
     if user_id == 0:
-        context = {
-            "username": "Guest",
-            "profile_pic": None,
-            "about": "This is a guest profile. Log in or specify a user ID to view a profile.",
-            "email": "guest@example.com",
-            "user_posts": [],
-        }
-        return render(request, "social-app/user_profile.html", context)
+        user=request.user
+    else:
+        user = get_object_or_404(User, id=user_id)
 
-    # Fetch the user and their profile by ID
-    user = get_object_or_404(User, id=user_id)
-    user_profile = get_object_or_404(UserProfile, user=user)
-    user_posts = Post.objects.filter(user=user).order_by("-created_at")
+    try:
+        user_profile_info = UserProfile.objects.filter(user=user).first()
+    except UserProfile.DoesNotExist:
+        user_profile_info= False
+        pass 
+
+    #user_profile_info = get_object_or_404(UserProfile, user=user.id)  
+    #user_posts = Post.objects.filter(user=user).order_by("-created_at")
 
     context = {
         "user_id": user.id,
         "username": user.username,
-        "profile_pic": (
-            user_profile.profile_pic.url if user_profile.profile_pic else None
-        ),
-        "about": user_profile.bio,
+        "about": user_profile_info.bio if user_profile_info else "" ,
         "email": user.email,
-        "user_profile": user_profile,
-        "user_posts": user_posts,
-    }
+        "profile_pic": user_profile_info.profile_pic.url if user_profile_info else False      ,
 
-    # Fake data just added to display something
+        "user_profile": user_profile_info,
 
-    fakeposts = [
-        {
-            "post_id": 1,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 2,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-        {
-            "post_id": 3,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 4,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-    ]
-
-    context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
-        "posts": fakeposts,
     }
 
     return render(request, "social-app/user_profile.html", context)
@@ -154,7 +111,6 @@ def search_user(request):
         data = User.objects.filter(Q(username__icontains=search_query))
 
         context = {"data": data}
-        print("data", data)
 
         return render(request, "social-app/search.html", context)
     else:
@@ -162,17 +118,6 @@ def search_user(request):
         # return HttpResponse("No search query provided.")
 
     return HttpResponse("Invalid request method.")
-
-
-@login_required
-def temp_profile(request):
-    temp_profile_list = User.objects.get(pk=1)
-    print("temp_profile")
-    context = {"temp_profile_list": temp_profile_list}
-    return render(
-        request, template_name="social-app/temp_profile.html", context=context
-    )
-
 
 @login_required
 def followers(request):
