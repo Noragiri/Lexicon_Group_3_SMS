@@ -33,60 +33,19 @@ def user_profile(request, user_id=0):
 
     # Fetch the user and their profile by ID
     user = get_object_or_404(User, id=user_id)
-    user_profile = get_object_or_404(UserProfile, user=user)
+    user_profile_info = get_object_or_404(UserProfile, user=user)
     user_posts = Post.objects.filter(user=user).order_by("-created_at")
 
     context = {
         "user_id": user.id,
         "username": user.username,
         "profile_pic": (
-            user_profile.profile_pic.url if user_profile.profile_pic else None
+            user_profile_info.profile_pic.url if user_profile_info.profile_pic else None
         ),
-        "about": user_profile.bio,
+        "about": user_profile_info.bio,
         "email": user.email,
-        "user_profile": user_profile,
+        "user_profile": user_profile_info,
         "user_posts": user_posts,
-    }
-
-    # Fake data just added to display something
-
-    fakeposts = [
-        {
-            "post_id": 1,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 2,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-        {
-            "post_id": 3,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 4,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-    ]
-
-    context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
-        "posts": fakeposts,
     }
 
     return render(request, "social-app/user_profile.html", context)

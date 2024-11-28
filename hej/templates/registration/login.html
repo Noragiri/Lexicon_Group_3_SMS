@@ -1,0 +1,15 @@
+{% extends "base/base_logged_out.html" %} {% load static %} {% block content %}
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
+	<div class="row">
+		<div class="col text-center">
+			<img src="{% static 'img/hej-logo.svg' %}" alt="Hej!" width="64" height="64" class="mb-3" />
+			<h2>Login</h2>
+			<form method="post">
+				{% csrf_token %} {{ form.as_p }}
+				<button type="submit" class="btn btn-primary">Login</button>
+			</form>
+			<p>Don't have an account? <a href="{% url 'social_app:register' %}">Register</a></p>
+		</div>
+	</div>
+</div>
+{% endblock %}
