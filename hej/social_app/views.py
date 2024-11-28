@@ -1,11 +1,13 @@
 """ Views for the social app. """
 
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
+from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.db import IntegrityError
 from social_app.models import UserProfile, Post
 from social_app.forms import UserForm, UserProfileInfoForm
 
@@ -197,21 +199,33 @@ def register(request):
         profile_form = UserProfileInfoForm(data=request.POST)
 
         if user_form.is_valid() and profile_form.is_valid():
+            try:
+                # Save user instance
+                user = user_form.save(commit=False)
 
-            user = user_form.save()
-            user.set_password(user.password)
-            user.save()
+                # Check if email is unique
+                if User.objects.filter(email=user.email).exists():
+                    raise ValidationError("A user with this email already exists.")
 
-            profile = profile_form.save(commit=False)
-            profile.user = user
+                # Save password and finalize user creation
+                user.set_password(user.password)
+                user.save()
 
-            if "profile_picture" in request.FILES:
-                profile.profile_picture = request.FILES["profile_picture"]
+                # Save profile instance
+                profile = profile_form.save(commit=False)
+                profile.user = user
 
-            profile.save()
+                # Save profile picture if provided
+                if "profile_picture" in request.FILES:
+                    profile.profile_picture = request.FILES["profile_picture"]
 
-            registered = True
+                profile.save()
+                registered = True
 
+            except ValidationError as e:
+                user_form.add_error("email", e.message)
+            except IntegrityError:
+                user_form.add_error(None, "An error occurred during registration.")
         else:
             print(user_form.errors, profile_form.errors)
     else:
