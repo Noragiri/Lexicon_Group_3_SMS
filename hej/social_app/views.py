@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from social_app.forms import UserForm, UserProfileInfoForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-
+from django.contrib.auth.decorators import login_required
 
 app_name = "social_app"
 
@@ -187,14 +187,22 @@ def user_profile_no_id(request, user_id=0):
     return render(request, "social-app/user_profile.html", context)
 
 
+@login_required
 def followers(request):
     """Render the search page."""
     return render(request, "social-app/followers.html")
 
 
+@login_required
 def following(request):
     """Render the search page."""
     return render(request, "social-app/following.html")
+
+
+@login_required
+def feed(request):
+    """Render the search page."""
+    return render(request, "social-app/feed.html")
 
 
 def register(request):
@@ -244,7 +252,7 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("/")  # Redirect to your homepage or dashboard
+            return redirect("/feed/")  # Redirect to your homepage or dashboard
         else:
             messages.error(request, "Invalid username or password")
     return render(request, "social-app/login.html")
@@ -431,13 +439,3 @@ def temp_profile(request):
     return render(
         request, template_name="social-app/temp_profile.html", context=context
     )
-
-
-def followers(request):
-    """Render the search page."""
-    return render(request, "social-app/followers.html")
-
-
-def following(request):
-    """Render the search page."""
-    return render(request, "social-app/following.html")
