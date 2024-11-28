@@ -9,8 +9,8 @@ from django.db import IntegrityError
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from social_app.models import UserProfile, Post
-from social_app.forms import UserForm, UserProfileInfoForm
+from social_app.models import UserProfile, Post, Comment
+from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
 
 app_name = "social_app"
@@ -228,3 +228,33 @@ def login_view(request):
 def custom_logout_view(request):
     logout(request)  # Logs out the user
     return redirect("social_app:login")  # Redirect to the homepage (or another page)
+
+
+@login_required
+def view_post(request, post_id):
+    """View a specific post and handle comments."""
+    post = get_object_or_404(Post, id=post_id)
+    comments = post.comments.all().order_by("-created_at")
+    new_comment = None
+
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.user = request.user
+            new_comment.save()
+            messages.success(request, "Comment added successfully.")
+            return redirect("social_app:view_post", post_id=post.id)
+    else:
+        comment_form = CommentForm()
+
+    return render(
+        request,
+        "social-app/view_post.html",
+        {
+            "post": post,
+            "comments": comments,
+            "comment_form": comment_form,
+        },
+    )

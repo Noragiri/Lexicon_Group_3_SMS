@@ -11,6 +11,7 @@ from social_app.views import (
     search_user,
     temp_profile,
     feed,
+    view_post,
 )
 
 app_name = "social_app"
@@ -32,4 +33,5 @@ urlpatterns = [
     path("search/temp/", temp_profile, name="temp_profile"),
     path("logout/", custom_logout_view, name="logout"),
     path("accounts/", include("django.contrib.auth.urls")),
+    path("post/<int:post_id>/", view_post, name="view_post"),
 ]
