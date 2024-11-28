@@ -1,13 +1,14 @@
 """ Views for the social app. """
 
-from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.db import IntegrityError
+from django.core.exceptions import ValidationError
+from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
 from social_app.models import UserProfile, Post
 from social_app.forms import UserForm, UserProfileInfoForm
 
@@ -192,6 +193,11 @@ def feed(request):
 
 
 def register(request):
+    """Register a new user."""
+
+    if request.user.is_authenticated:
+        return redirect("social_app:feed")
+
     registered = False
 
     if request.method == "POST":
@@ -244,13 +250,17 @@ def register(request):
 
 
 def login_view(request):
+    """Log in a user."""
+    if request.user.is_authenticated:
+        return redirect("social_app:feed")
+
     if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("/feed/")  # Redirect to your homepage or dashboard
+            return redirect("social_app:feed")
         else:
             messages.error(request, "Invalid username or password")
     return render(request, "social-app/login.html")
