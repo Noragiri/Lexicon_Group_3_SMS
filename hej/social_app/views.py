@@ -1,13 +1,13 @@
 """ Views for the social app. """
 
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from social_app.models import UserProfile, Post
 from django.contrib.auth.models import User
-from social_app.forms import UserForm, UserProfileInfoForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from social_app.models import UserProfile, Post
+from social_app.forms import UserForm, UserProfileInfoForm
 
 
 app_name = "social_app"

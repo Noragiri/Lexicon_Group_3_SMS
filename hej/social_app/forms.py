@@ -24,10 +24,3 @@ class UserProfileInfoForm(forms.ModelForm):
 
         model = UserProfile
         fields = ("bio",)
-
-    def clean_email(self):
-        """Validate that the email is unique"""
-        email = self.cleaned_data.get("email")
-        if UserProfile.objects.filter(email=email).exists():
-            raise forms.ValidationError("A user with that email already exists.")
-        return email
