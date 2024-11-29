@@ -15,8 +15,7 @@ class UserProfile(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        #return self.user.username
-        return self.user
+        return self.user.username
 
 
 class Post(models.Model):
