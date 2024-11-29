@@ -4,11 +4,12 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db import IntegrityError
-from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
+from django.urls import reverse
 from social_app.models import UserProfile, Post, Comment
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
@@ -18,7 +19,7 @@ app_name = "social_app"
 
 @login_required
 def user_profile(request, user_id=None):
-    """Render the user profile."""
+    """Render the user profile with posts and nested comments."""
 
     # If no user_id is provided, use the logged-in user's profile
     if user_id is None:
@@ -30,6 +31,21 @@ def user_profile(request, user_id=None):
     user_profile_info = get_object_or_404(UserProfile, user=user)
     user_posts = Post.objects.filter(user=user_profile_info).order_by("-created_at")
 
+    posts_with_comments = []
+    for post in user_posts:
+        # Fetch the top-level comments for the post
+        top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+            :2
+        ]
+
+        # For each top-level comment, fetch its replies (nested comments)
+        comments_with_replies = []
+        for comment in top_level_comments:
+            replies = comment.replies.all().order_by("created_at")
+            comments_with_replies.append({"comment": comment, "replies": replies})
+
+        posts_with_comments.append({"post": post, "comments": comments_with_replies})
+
     context = {
         "user_id": user.id,
         "username": user.username,
@@ -39,55 +55,7 @@ def user_profile(request, user_id=None):
         "about": user_profile_info.bio,
         "email": user.email,
         "user_profile": user_profile_info,
-        "user_posts": user_posts,
-    }
-
-    return render(request, "social-app/user_profile.html", context)
-
-
-@login_required
-def user_profile_no_id(request, user_id=0):
-    """Render the user profile."""
-
-    # Fake data just added to display something
-
-    fakeposts = [
-        {
-            "post_id": 1,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 2,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-        {
-            "post_id": 3,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 4,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-    ]
-
-    context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
-        "posts": fakeposts,
+        "posts_with_comments": posts_with_comments,
     }
 
     return render(request, "social-app/user_profile.html", context)
