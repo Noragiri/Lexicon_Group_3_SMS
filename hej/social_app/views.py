@@ -26,8 +26,8 @@ def user_profile(request, user_id=None):
         user = get_object_or_404(User, id=user_id)
 
     try:
-        user_profile_info = UserProfile.objects.filter(user=user).first()
-    except UserProfile.DoesNotExist:
+        user_profile_info = User.objects.filter(id=user_id).first()
+    except User.DoesNotExist:
         user_profile_info = False
         pass
 
