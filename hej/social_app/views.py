@@ -9,7 +9,6 @@ from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from django.urls import reverse
 from social_app.models import UserProfile, Post, Comment
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
@@ -21,14 +20,18 @@ app_name = "social_app"
 def user_profile(request, user_id=None):
     """Render the user profile with posts and nested comments."""
 
-    # If no user_id is provided, use the logged-in user's profile
     if user_id is None:
         user = request.user
     else:
         user = get_object_or_404(User, id=user_id)
 
+    try:
+        user_profile_info = get_object_or_404(UserProfile, user=user)
+    except UserProfile.DoesNotExist:
+        user_profile_info = False
+        pass
+
     # Fetch the user's profile and posts
-    user_profile_info = get_object_or_404(UserProfile, user=user)
     user_posts = Post.objects.filter(user=user_profile_info).order_by("-created_at")
 
     posts_with_comments = []
@@ -50,9 +53,11 @@ def user_profile(request, user_id=None):
         "user_id": user.id,
         "username": user.username,
         "profile_pic": (
-            user_profile_info.profile_pic.url if user_profile_info.profile_pic else None
+            user_profile_info.profile_pic.url
+            if user_profile_info.profile_pic
+            else False
         ),
-        "about": user_profile_info.bio,
+        "about": user_profile_info.bio if user_profile_info else "",
         "email": user.email,
         "user_profile": user_profile_info,
         "posts_with_comments": posts_with_comments,
@@ -75,7 +80,6 @@ def search_user(request):
         data = User.objects.filter(Q(username__icontains=search_query))
 
         context = {"data": data}
-        print("data", data)
 
         return render(request, "social-app/search.html", context)
     else:
@@ -83,16 +87,6 @@ def search_user(request):
         # return HttpResponse("No search query provided.")
 
     return HttpResponse("Invalid request method.")
-
-
-@login_required
-def temp_profile(request):
-    temp_profile = User.objects.get(pk=1)
-    print("temp_profile")
-    context = {"temp_profile": temp_profile}
-    return render(
-        request, template_name="social-app/temp_profile.html", context=context
-    )
 
 
 @login_required
