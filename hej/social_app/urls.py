@@ -19,7 +19,7 @@ app_name = "social_app"
 # path("user_profile/", user_profile, name="user_profile_my_profile"),
 # path("user_profile/<int:user_id>/", user_profile, name="user_profile"),
 #    path("", temporary_startpage, name="home"),
-#path("user_profile/<int:user_id>/", user_profile, name="user_profile"),
+# path("user_profile/<int:user_id>/", user_profile, name="user_profile"),
 
 
 urlpatterns = [
@@ -32,6 +32,5 @@ urlpatterns = [
     path("following/", following, name="following"),
     path("search/", search_user, name="search_user"),
     path("logout/", custom_logout_view, name="logout"),
-    path("accounts/", include("django.contrib.auth.urls")),
     path("post/<int:post_id>/", view_post, name="view_post"),
 ]
