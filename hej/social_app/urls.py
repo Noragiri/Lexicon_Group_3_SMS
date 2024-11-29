@@ -11,6 +11,7 @@ from social_app.views import (
     search_user,
     feed,
     view_post,
+    follow_user,
 )
 
 

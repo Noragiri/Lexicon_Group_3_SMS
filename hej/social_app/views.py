@@ -19,9 +19,21 @@ app_name = "social_app"
 @login_required
 def followers(request, user_id):
     """Render the followers list for a user."""
-    user = get_object_or_404(User, id=user_id)
-    user_profile = get_object_or_404(UserProfile, user=user)
-    user = User.objects.get(id=user_id)
+    # user = get_object_or_404(User, id=user_id)
+    # user_profile = get_object_or_404(UserProfile, user=user)
+    # user = User.objects.get(id=user_id)
+
+    return render(request, "social-app/followers.html")
+
+
+@login_required
+def follow_user(request, user_id):
+    """Render the followers list for a user."""
+    # user = get_object_or_404(User, id=user_id)
+    # user_profile = get_object_or_404(UserProfile, user=user)
+    # user = User.objects.get(id=user_id)
+
+    return render(request, "social-app/followers.html")
 
 
 @login_required
@@ -95,12 +107,6 @@ def search_user(request):
         # return HttpResponse("No search query provided.")
 
     return HttpResponse("Invalid request method.")
-
-
-@login_required
-def followers(request):
-    """Render the search page."""
-    return render(request, "social-app/followers.html")
 
 
 @login_required
