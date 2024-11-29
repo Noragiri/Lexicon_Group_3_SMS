@@ -1,11 +1,16 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.models import User
+""" Views for the social app. """
+
 from django.contrib import messages
-from .models import Follow, UserProfile, Post
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.core.exceptions import ValidationError
 from django.db.models import Q
-from .models import User
-from django.shortcuts import render
+from django.db import IntegrityError
+from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
+from social_app.models import UserProfile, Post, Comment
+from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
 
 @login_required
@@ -15,141 +20,104 @@ def followers(request, user_id):
     user_profile = get_object_or_404(UserProfile, user=user)
     user = User.objects.get(id=user_id)
 
-    # Get all followers of the target user
-    followers = Follow.objects.filter(following=user_profile)
-    followers_list = [f.follower for f in followers]  # Get the followers
 
-    context = {
-        "user_profile": user_profile,
-        "followers_list": followers_list,
-    }
-
-    return render(request, "social-app/followers.html", context)
-
-# View to show the list of following
 @login_required
-def following(request, user_id):
-    """Render the following list for a user."""
-    user = get_object_or_404(User, id=user_id)
-    user_profile = get_object_or_404(UserProfile, user=user)
+def user_profile(request, user_id=None):
+    """Render the user profile with posts and nested comments."""
 
-    # Get all users that this user is following
-    following = Follow.objects.filter(follower=user_profile)
-    following_list = [f.following for f in following]  # Get the following list
-
-    context = {
-        "user_profile": user_profile,
-        "following_list": following_list,
-    }
-
-    return render(request, "social-app/following.html", context)
-
-
-def followers(request, user_id):
-    user_profile = get_object_or_404(User, id=user_id)
-    followers_list = user_profile.followers.all()  # Assuming the relation is set up
-    return render(request, 'social-app/followers.html', {
-        'user_profile': user_profile,
-        'followers_list': followers_list,
-    })
-
-def following(request, user_id):
-    user_profile = get_object_or_404(User, id=user_id)
-    following_list = user_profile.following.all()  # Assuming the relation is set up
-    return render(request, 'social-app/following.html', {
-        'user_profile': user_profile,
-        'following_list': following_list,
-    })
-
-def follow_user(request, user_id):
-    """Handle following a user."""
-    # Get the user to follow
-    user_to_follow = get_object_or_404(User, id=user_id)
-    user_profile = request.user.profile  # Get the profile of the logged-in user
-    
-    # Check if the logged-in user is already following the target user
-    if not Follow.objects.filter(follower=user_profile, following=user_to_follow.profile).exists():
-        # If not, create a new follow relationship
-        Follow.objects.create(follower=user_profile, following=user_to_follow.profile)
-        messages.success(request, f"You are now following {user_to_follow.username}")
+    if user_id is None:
+        user = request.user
     else:
-        messages.info(request, f"You are already following {user_to_follow.username}")
+        user = get_object_or_404(User, id=user_id)
 
-    return redirect('social_app:user_profile', user_id=user_id)  # Redirect to the user's profile
+    try:
+        user_profile_info = UserProfile.objects.filter(user=user).first()
+    except UserProfile.DoesNotExist:
+        user_profile_info = False
+        pass
 
+    # Fetch the user's profile and posts
+    user_posts = Post.objects.filter(user=user_profile_info).order_by("-created_at")
 
-def user_profile(request, user_id=0):
-    """Render the user profile."""
-    if user_id == 0:
-        context = {
-            "username": "Guest",
-            "profile_pic": None,
-            "about": "This is a guest profile. Log in or specify a user ID to view a profile.",
-            "email": "guest@example.com",
-            "user_posts": [],
-        }
-        return render(request, "social-app/user_profile.html", context)
+    posts_with_comments = []
+    for post in user_posts:
+        # Fetch the top-level comments for the post
+        top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+            :2
+        ]
 
-    user = get_object_or_404(User, id=user_id)
-    user_profile = get_object_or_404(UserProfile, user=user)
-    user_posts = Post.objects.filter(user=user).order_by("-created_at")
+        # For each top-level comment, fetch its replies (nested comments)
+        comments_with_replies = []
+        for comment in top_level_comments:
+            replies = comment.replies.all().order_by("created_at")
+            comments_with_replies.append({"comment": comment, "replies": replies})
+
+        posts_with_comments.append({"post": post, "comments": comments_with_replies})
 
     context = {
         "user_id": user.id,
         "username": user.username,
         "profile_pic": (
-            user_profile.profile_pic.url if user_profile.profile_pic else None
+            user_profile_info.profile_pic.url
+            if user_profile_info.profile_pic
+            else False
         ),
-        "about": user_profile.bio,
+        "about": user_profile_info.bio if user_profile_info else "",
         "email": user.email,
-        "user_profile": user_profile,
-        "user_posts": user_posts,
+        "user_profile": user_profile_info,
+        "posts_with_comments": posts_with_comments,
     }
 
     return render(request, "social-app/user_profile.html", context)
 
 
-def user_profile_no_id(request, user_id=0):
-    """Render the user profile."""
-    fakeposts = [
-        {"post_id": 1, "name": "Name Namesson", "date": "2024-12-04", "message": "Oyeah this and that"},
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {"post_id": 2, "name": "John Smith", "date": "2024-12-06", "message": "Yet another post content"},
-        {"post_id": 3, "name": "Name Namesson", "date": "2024-12-04", "message": "Oyeah this and that"},
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {"post_id": 4, "name": "John Smith", "date": "2024-12-06", "message": "Yet another post content"},
-    ]
-
-    context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
-        "posts": fakeposts,
-    }
-
-    return render(request, "social-app/user_profile.html", context)
-
-
+@login_required
 def search_user(request):
     if "SearchQuery" in request.GET:
+        # get all users
+        # users=User.object.all()
+        data = None
+
         search_query = request.GET.get("SearchQuery")
+
+        # using Query tool to add multiple quries to get data from model
+        # based on first name or last name enetered in search box.
         data = User.objects.filter(Q(username__icontains=search_query))
+
         context = {"data": data}
+
         return render(request, "social-app/search.html", context)
     else:
         return render(request, "social-app/user_profile.html")
+        # return HttpResponse("No search query provided.")
+
+    return HttpResponse("Invalid request method.")
 
 
-def temp_profile(request):
-    temp_profile = User.objects.get(pk=1)
-    context = {"temp_profile": temp_profile}
-    return render(request, "social-app/temp_profile.html", context)
+@login_required
+def followers(request):
+    """Render the search page."""
+    return render(request, "social-app/followers.html")
+
+
+@login_required
+def following(request):
+    """Render the search page."""
+    return render(request, "social-app/following.html")
+
+
+@login_required
+def feed(request):
+    """Render the search page."""
+    return render(request, "social-app/feed.html")
 
 
 def register(request):
+    """Register a new user."""
+
+    if request.user.is_authenticated:
+        return redirect("social_app:feed")
+
     registered = False
 
     if request.method == "POST":
@@ -157,19 +125,33 @@ def register(request):
         profile_form = UserProfileInfoForm(data=request.POST)
 
         if user_form.is_valid() and profile_form.is_valid():
-            user = user_form.save()
-            user.set_password(user.password)
-            user.save()
+            try:
+                # Save user instance
+                user = user_form.save(commit=False)
 
-            profile = profile_form.save(commit=False)
-            profile.user = user
+                # Check if email is unique
+                if User.objects.filter(email=user.email).exists():
+                    raise ValidationError("A user with this email already exists.")
 
-            if "profile_picture" in request.FILES:
-                profile.profile_picture = request.FILES["profile_picture"]
+                # Save password and finalize user creation
+                user.set_password(user.password)
+                user.save()
 
-            profile.save()
+                # Save profile instance
+                profile = profile_form.save(commit=False)
+                profile.user = user
 
-            registered = True
+                # Save profile picture if provided
+                if "profile_picture" in request.FILES:
+                    profile.profile_picture = request.FILES["profile_picture"]
+
+                profile.save()
+                registered = True
+
+            except ValidationError as e:
+                user_form.add_error("email", e.message)
+            except IntegrityError:
+                user_form.add_error(None, "An error occurred during registration.")
         else:
             print(user_form.errors, profile_form.errors)
     else:
@@ -184,13 +166,17 @@ def register(request):
 
 
 def login_view(request):
+    """Log in a user."""
+    if request.user.is_authenticated:
+        return redirect("social_app:feed")
+
     if request.method == "POST":
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect("/")  # Redirect to your homepage or dashboard
+            return redirect("social_app:feed")
         else:
             messages.error(request, "Invalid username or password")
     return render(request, "social-app/login.html")
@@ -198,17 +184,34 @@ def login_view(request):
 
 def custom_logout_view(request):
     logout(request)  # Logs out the user
-    return redirect("social_app:login")  # Redirect to the login page
+    return redirect("social_app:login")  # Redirect to the homepage (or another page)
 
 
-def followers(request):
-    """Render the followers page (currently placeholder)."""
-    return render(request, "social-app/followers.html")
+@login_required
+def view_post(request, post_id):
+    """View a specific post and handle comments."""
+    post = get_object_or_404(Post, id=post_id)
+    comments = post.comments.all().order_by("-created_at")
+    new_comment = None
 
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.user = request.user
+            new_comment.save()
+            messages.success(request, "Comment added successfully.")
+            return redirect("social_app:view_post", post_id=post.id)
+    else:
+        comment_form = CommentForm()
 
-def following(request):
-    """Render the following page (currently placeholder)."""
-    return render(request, "social-app/following.html")
-
-def temporary_startpage(request):
-    return render(request, 'social-app/temporary_startpage.html')
+    return render(
+        request,
+        "social-app/view_post.html",
+        {
+            "post": post,
+            "comments": comments,
+            "comment_form": comment_form,
+        },
+    )
