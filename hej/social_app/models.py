@@ -7,7 +7,7 @@ class UserProfile(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     profile_pic = models.ImageField(
-        upload_to="profile_pics/", default="../static/img/user-icon.jpg"
+        upload_to="profile_pics/", default="../static/img/user-icon.png"
     )
     bio = models.TextField(max_length=500, blank=True)
     email = models.EmailField(max_length=264, unique=True)
