@@ -1,11 +1,24 @@
-{% extends "base/base.html" %} {% load static %} {% block content %}
+{% extends "base/base.html" %}
+{% load static %}
+{% block content %}
 <div class="container-fluid">
-	<div class="row">
-		<div class="col col-8">
-			<h1>Followers</h1>
-			{% include "social-app/modules/simple_user_list.html" %}
-		</div>
-		<div class="col"></div>
-	</div>
+    <div class="row">
+        <div class="col col-8">
+            <h1>{{ user_profile.username }} Followers</h1>
+            
+            <!-- Display the list of followers -->
+            <ul>
+                {% for follower in followers_list %}
+                    <li>{{ follower.username }}</li>
+                {% empty %}
+                    <li>No followers yet.</li>
+                {% endfor %}
+            </ul>
+
+            <!-- You can keep the simple_user_list inclusion if you'd like to reuse the user listing UI -->
+            {% include "social-app/modules/simple_user_list.html" %}
+        </div>
+        <div class="col"></div>
+    </div>
 </div>
 {% endblock %}
