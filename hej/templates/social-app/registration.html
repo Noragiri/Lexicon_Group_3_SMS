@@ -1,16 +1,27 @@
-{% extends "base/base.html" %} {% load static %} {% block content %}
+{% extends "base/base_logged_out.html" %} {% load static %} {% block content %} {% if registered %}
+<h1>Thank you for registering!</h1>
+{% else %}
 
-<div class="jumbotron">
-	{% if registered %}
-	<h1>Thank you for registering!</h1>
-	{% else %}
-	<h1>Register here!</h1>
-	<h3>Fill out the form:</h3>
-	<form enctype="multipart/form-data" method="POST">
-		{% csrf_token %} {{ user_form.as_p }} {{ profile_form.as_p }}
-		<input type="submit" value="Register" />
-	</form>
-	{% endif %}
+<div class="container-fluid vh-100 d-flex justify-content-center align-items-center">
+	<div class="row">
+		<div class="col text-center">
+			<img src="{% static 'img/hej-logo.svg' %}" alt="Hej!" width="64" height="64" class="mb-2" />
+			<h1 class="mb-4">Register</h1>
+			<form enctype="multipart/form-data" method="POST">
+				{% csrf_token %} {{ user_form.as_p }} {{ profile_form.as_p }}
+				<input type="submit" value="Register" />
+			</form>
+			{% if messages %}
+			<ul>
+				{% for message in messages %}
+				<li>{{ message }}</li>
+				{% endfor %}
+			</ul>
+			{% endif %}
+
+			<p>Don't have an account? <a href="{% url 'social_app:register' %}">Register</a></p>
+		</div>
+	</div>
 </div>
 
-{% endblock %}
+{% endif %} {% endblock %}
