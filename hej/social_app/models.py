@@ -1,15 +1,7 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
-class Post(models.Model):
-    title = models.CharField(max_length=255, default='Default Title')
-    content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-    def __str__(self):
-        return self.title
-# Define UserProfile first
 class UserProfile(models.Model):
     """Model representing a user profile"""
 
@@ -27,17 +19,19 @@ class UserProfile(models.Model):
 
 # Now define Follow model using a string reference to UserProfile
 class Follow(models.Model):
-    follower = models.ForeignKey(UserProfile, related_name='following', on_delete=models.CASCADE)
-    following = models.ForeignKey(UserProfile, related_name='followers', on_delete=models.CASCADE)
-    
+    follower = models.ForeignKey(
+        UserProfile, related_name="following", on_delete=models.CASCADE
+    )
+    following = models.ForeignKey(
+        UserProfile, related_name="followers", on_delete=models.CASCADE
+    )
+
+
 class Post(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="posts")
     content = models.TextField()
     image = models.ImageField(upload_to="post_images/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('follower', 'following')
 
     def __str__(self):
         return f"{self.pk} - {self.content[:30]}"
