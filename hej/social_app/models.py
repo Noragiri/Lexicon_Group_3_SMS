@@ -12,8 +12,6 @@ class UserProfile(models.Model):
     bio = models.TextField(max_length=500, blank=True)
     email = models.EmailField(max_length=264, unique=True)
 
-    objects = models.Manager()
-
     def __str__(self):
         return self.user.username
 
@@ -26,7 +24,21 @@ class Post(models.Model):
     image = models.ImageField(upload_to="post_images/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    objects = models.Manager()
-
     def __str__(self):
         return f"{self.pk} - {self.content[:30]}"
+
+
+class Comment(models.Model):
+    post = models.ForeignKey(Post, related_name="comments", on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey(
+        "self", related_name="replies", null=True, blank=True, on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on Post {self.post.id}"
+
+    class Meta:
+        ordering = ["created_at"]

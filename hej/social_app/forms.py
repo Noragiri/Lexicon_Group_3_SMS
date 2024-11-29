@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.models import User
-from social_app.models import UserProfile
+from social_app.models import UserProfile, Comment
 
 
 class UserForm(forms.ModelForm):
@@ -36,9 +36,21 @@ class UserProfileInfoForm(forms.ModelForm):
 
         model = UserProfile
         fields = ("bio",)
-
         widgets = {
             "bio": forms.Textarea(
                 attrs={"class": "form-control", "placeholder": "Bio"}
             ),
         }
+
+
+class CommentForm(forms.ModelForm):
+    """Form for adding comments to a post"""
+
+    content = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 3, "placeholder": "Write a comment..."}),
+        label="",
+    )
+
+    class Meta:
+        model = Comment
+        fields = ("content",)

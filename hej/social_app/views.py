@@ -4,94 +4,63 @@ from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.paginator import Paginator
+from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db import IntegrityError
-from django.core.exceptions import ValidationError
-from django.urls import reverse
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from social_app.models import UserProfile, Post
-from social_app.forms import UserForm, UserProfileInfoForm
+from social_app.models import UserProfile, Post, Comment
+from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
 
 app_name = "social_app"
 
 
 @login_required
-def user_profile(request, user_id=0):
-    """Render the user profile."""
+def user_profile(request, user_id=None):
+    """Render the user profile with posts and nested comments."""
 
-    #If no user_id is provided, show a default user profile (or a placeholder for now)
-    if user_id == 0:
-        user=request.user
+    if user_id is None:
+        user = request.user
     else:
         user = get_object_or_404(User, id=user_id)
 
     try:
-        user_profile_info = UserProfile.objects.filter(user=user).first()
+        user_profile_info = get_object_or_404(UserProfile, user=user)
     except UserProfile.DoesNotExist:
-        user_profile_info= False
-        pass 
+        user_profile_info = False
+        pass
 
-    #user_profile_info = get_object_or_404(UserProfile, user=user.id)  
-    #user_posts = Post.objects.filter(user=user).order_by("-created_at")
+    # Fetch the user's profile and posts
+    user_posts = Post.objects.filter(user=user_profile_info).order_by("-created_at")
+
+    posts_with_comments = []
+    for post in user_posts:
+        # Fetch the top-level comments for the post
+        top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+            :2
+        ]
+
+        # For each top-level comment, fetch its replies (nested comments)
+        comments_with_replies = []
+        for comment in top_level_comments:
+            replies = comment.replies.all().order_by("created_at")
+            comments_with_replies.append({"comment": comment, "replies": replies})
+
+        posts_with_comments.append({"post": post, "comments": comments_with_replies})
 
     context = {
         "user_id": user.id,
         "username": user.username,
-        "about": user_profile_info.bio if user_profile_info else "" ,
+        "profile_pic": (
+            user_profile_info.profile_pic.url
+            if user_profile_info.profile_pic
+            else False
+        ),
+        "about": user_profile_info.bio if user_profile_info else "",
         "email": user.email,
-        "profile_pic": user_profile_info.profile_pic.url if user_profile_info else False      ,
-
         "user_profile": user_profile_info,
-
-    }
-
-    return render(request, "social-app/user_profile.html", context)
-
-
-@login_required
-def user_profile_no_id(request, user_id=0):
-    """Render the user profile."""
-
-    # Fake data just added to display something
-
-    fakeposts = [
-        {
-            "post_id": 1,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 2,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-        {
-            "post_id": 3,
-            "name": "Name Namesson",
-            "date": "2024-12-04",
-            "message": "Oyeah this and that",
-        },
-        {"name": "Jane Doe", "date": "2024-12-05", "message": "Another post content"},
-        {
-            "post_id": 4,
-            "name": "John Smith",
-            "date": "2024-12-06",
-            "message": "Yet another post content",
-        },
-    ]
-
-    context = {
-        "user_id": user_id,
-        "username": "Alice",
-        "password": "password",
-        "profile_pic": "https://www.fillmurray.com/200/300",
-        "about": "I am a software engineer.",
-        "email": "hej@hej.com",
-        "posts": fakeposts,
+        "posts_with_comments": posts_with_comments,
     }
 
     return render(request, "social-app/user_profile.html", context)
@@ -118,6 +87,7 @@ def search_user(request):
         # return HttpResponse("No search query provided.")
 
     return HttpResponse("Invalid request method.")
+
 
 @login_required
 def followers(request):
@@ -214,3 +184,33 @@ def login_view(request):
 def custom_logout_view(request):
     logout(request)  # Logs out the user
     return redirect("social_app:login")  # Redirect to the homepage (or another page)
+
+
+@login_required
+def view_post(request, post_id):
+    """View a specific post and handle comments."""
+    post = get_object_or_404(Post, id=post_id)
+    comments = post.comments.all().order_by("-created_at")
+    new_comment = None
+
+    if request.method == "POST":
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            new_comment = comment_form.save(commit=False)
+            new_comment.post = post
+            new_comment.user = request.user
+            new_comment.save()
+            messages.success(request, "Comment added successfully.")
+            return redirect("social_app:view_post", post_id=post.id)
+    else:
+        comment_form = CommentForm()
+
+    return render(
+        request,
+        "social-app/view_post.html",
+        {
+            "post": post,
+            "comments": comments,
+            "comment_form": comment_form,
+        },
+    )
