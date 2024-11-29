@@ -41,18 +41,14 @@ def user_profile(request, user_id=None):
     """Render the user profile with posts and nested comments."""
 
     if user_id is None:
-        user = request.user
+        user_user = request.user
     else:
-        user = get_object_or_404(User, id=user_id)
+        user_user = get_object_or_404(User, id=user_id)
 
-    try:
-        user_profile_info = UserProfile.objects.filter(user=user).first()
-    except UserProfile.DoesNotExist:
-        user_profile_info = False
-        pass
+    user_profile_info = UserProfile.objects.filter(user=user_user).first()
 
     # Fetch the user's profile and posts
-    user_posts = Post.objects.filter(user=user_profile_info).order_by("-created_at")
+    user_posts = Post.objects.filter(user=user_user).order_by("-created_at")
 
     posts_with_comments = []
     for post in user_posts:
@@ -70,15 +66,15 @@ def user_profile(request, user_id=None):
         posts_with_comments.append({"post": post, "comments": comments_with_replies})
 
     context = {
-        "user_id": user.id,
-        "username": user.username,
+        "user_id": user_user.id,
+        "username": user_user.username,
         "profile_pic": (
             user_profile_info.profile_pic.url
             if user_profile_info.profile_pic
             else False
         ),
         "about": user_profile_info.bio if user_profile_info else "",
-        "email": user.email,
+        "email": user_user.email,
         "user_profile": user_profile_info,
         "posts_with_comments": posts_with_comments,
     }
