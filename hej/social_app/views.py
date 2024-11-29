@@ -13,6 +13,9 @@ from social_app.models import UserProfile, Post, Comment
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
 
+app_name = "social_app"
+
+
 @login_required
 def followers(request, user_id):
     """Render the followers list for a user."""
@@ -158,11 +161,15 @@ def register(request):
         user_form = UserForm()
         profile_form = UserProfileInfoForm()
 
-    return render(request, "social-app/registration.html", {
-        "user_form": user_form,
-        "profile_form": profile_form,
-        "registered": registered,
-    })
+    return render(
+        request,
+        "social-app/registration.html",
+        {
+            "user_form": user_form,
+            "profile_form": profile_form,
+            "registered": registered,
+        },
+    )
 
 
 def login_view(request):
