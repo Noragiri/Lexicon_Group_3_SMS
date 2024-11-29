@@ -9,7 +9,14 @@ class UserForm(forms.ModelForm):
     password = forms.CharField(
         widget=forms.PasswordInput(
             attrs={"class": "form-control", "placeholder": "Password"}
-        )
+        ),
+        label="Password",
+        help_text="Enter your password.",
+    )
+    confirm_password = forms.CharField(
+        widget=forms.PasswordInput(),
+        label="Confirm Password",
+        help_text="Re-enter your password for confirmation.",
     )
 
     class Meta:
@@ -25,17 +32,35 @@ class UserForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Email"}
             ),
         }
-        """TODO: Check if password == repeat password"""
+
+    def clean(self):
+        """Override clean method to validate password match"""
+        cleaned_data = super().clean()
+        password = cleaned_data.get("password")
+        confirm_password = cleaned_data.get("confirm_password")
+
+        if password and confirm_password and password != confirm_password:
+            self.add_error("confirm_password", "Passwords do not match.")
+
+        return cleaned_data
 
 
 class UserProfileInfoForm(forms.ModelForm):
     """Form for the UserProfile model"""
 
+    bio = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"rows": 3, "placeholder": "Tell us about yourself"}
+        ),
+        required=False,  # Optional field
+        label="Describe yourself",
+    )
+
     class Meta:
         """Specify the model and fields to include in the form"""
 
         model = UserProfile
-        fields = ("bio",)
+        fields = ("bio", "profile_pic")
         widgets = {
             "bio": forms.Textarea(
                 attrs={"class": "form-control", "placeholder": "Bio"}
