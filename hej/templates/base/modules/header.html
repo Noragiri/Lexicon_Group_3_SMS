@@ -3,10 +3,7 @@
 	<div class="container-fluid">
 		<div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
 			<!-- Logo -->
-			<a href="{% url 'social_app:feed' %}"
-				class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none"> <img
-					class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"
-					src="{% static 'img/hej-logo.svg' %}" /> </a>
+			<a href="{% url 'social_app:feed' %}" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none"> <img class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap" src="{% static 'img/hej-logo.svg' %}" /> </a>
 			<!-- Navigation -->
 			<ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
 				<li>
@@ -18,23 +15,17 @@
 				<li>
 					<a href="{% url 'social_app:following' %}" class="nav-link px-2 link-body-emphasis">Following</a>
 				</li>
-				<li><a href="{% url 'social_app:followers' %}" class="nav-link px-2 link-body-emphasis">Followers</a>
-				</li>
+				<li><a href="{% url 'social_app:followers' %}" class="nav-link px-2 link-body-emphasis">Followers</a></li>
 			</ul>
 			<!-- Search form -->
-			<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3 d-flex" role="search"
-				action="{% url 'social_app:search_user' %}" method="get">
-				<input type="search" class="form-control me-2" name="SearchQuery" placeholder="Search User"
-					aria-label="Search" />
+			<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3 d-flex" role="search" action="{% url 'social_app:search_user' %}" method="get">
+				<input type="search" class="form-control me-2" name="SearchQuery" placeholder="Search User" aria-label="Search" />
 				<button type="submit" class="btn btn-primary">Search</button>
 			</form>
 
 			<!-- User profile -->
 			<div class="dropdown text-end">
-				<a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle"
-					data-bs-toggle="dropdown" aria-expanded="false">
-					<img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle" />
-				</a>
+				<a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"> <img src="{{ current_user_profile_info.profile_pic.url }}" width="32" height="32" class="rounded-circle" /> </a>
 				<ul class="dropdown-menu text-small" style="">
 					{% if request.user.is_authenticated %}
 					<li class="dropdown-item"><a class="nav-link" href="{% url 'social_app:logout' %}">Logout</a></li>
