@@ -13,8 +13,11 @@ class UserForm(forms.ModelForm):
         label="Password",
         help_text="Enter your password.",
     )
+
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(),
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Password"}
+        ),
         label="Confirm Password",
         help_text="Re-enter your password for confirmation.",
     )
@@ -50,10 +53,26 @@ class UserProfileInfoForm(forms.ModelForm):
 
     bio = forms.CharField(
         widget=forms.Textarea(
-            attrs={"rows": 3, "placeholder": "Tell us about yourself"}
+            attrs={
+                "class": "form-control",
+                "placeholder": "Tell us about yourself",
+                "rows": 3,
+                "maxlength": 500,
+            }
         ),
         required=False,  # Optional field
         label="Describe yourself",
+    )
+
+    profile_pic = forms.ImageField(
+        widget=forms.FileInput(
+            attrs={
+                "class": "form-control",
+                "accept": "image/*",  # Accept only image files
+            }
+        ),
+        required=False,  # Optional field
+        label="Profile Picture",
     )
 
     class Meta:
@@ -61,11 +80,6 @@ class UserProfileInfoForm(forms.ModelForm):
 
         model = UserProfile
         fields = ("bio", "profile_pic")
-        widgets = {
-            "bio": forms.Textarea(
-                attrs={"class": "form-control", "placeholder": "Bio"}
-            ),
-        }
 
 
 class CommentForm(forms.ModelForm):
