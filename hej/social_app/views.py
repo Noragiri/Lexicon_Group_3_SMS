@@ -17,6 +17,26 @@ app_name = "social_app"  # Used for namespacing URLs in templates
 
 
 @login_required
+def followers(request, user_id):
+    """Render the followers list for a user."""
+    # user = get_object_or_404(User, id=user_id)
+    # user_profile = get_object_or_404(UserProfile, user=user)
+    # user = User.objects.get(id=user_id)
+
+    return render(request, "social-app/followers.html")
+
+
+@login_required
+def follow_user(request, user_id):
+    """Render the followers list for a user."""
+    # user = get_object_or_404(User, id=user_id)
+    # user_profile = get_object_or_404(UserProfile, user=user)
+    # user = User.objects.get(id=user_id)
+
+    return render(request, "social-app/followers.html")
+
+
+@login_required
 def user_profile(request, user_id=None):
     """Render the user profile with posts and nested comments."""
 
@@ -72,11 +92,13 @@ def search_user(request):
         # users=User.object.all()
         data = None
 
-        #search_query = request.GET.get("SearchQuery")
-        search_query =  get_object_or_404(request.GET, "SearchQuery")
+        # search_query = request.GET.get("SearchQuery")
+        search_query = get_object_or_404(request.GET, "SearchQuery")
 
         # using Query tool to add multiple quries to get data from model
-        data = User.objects.filter(Q(username__icontains=search_query)).select_related('userprofile')
+        data = User.objects.filter(Q(username__icontains=search_query)).select_related(
+            "userprofile"
+        )
 
         context = {"data": data}
         return render(request, "social-app/search.html", context)
@@ -85,12 +107,6 @@ def search_user(request):
         # return HttpResponse("No search query provided.")
 
     return HttpResponse("Invalid request method.")
-
-
-@login_required
-def followers(request):
-    """Render the search page."""
-    return render(request, "social-app/followers.html")
 
 
 @login_required

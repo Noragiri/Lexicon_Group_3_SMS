@@ -6,15 +6,27 @@ class UserProfile(models.Model):
     """Model representing a user profile"""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
     profile_pic = models.ImageField(
         upload_to="profile_pics/", default="../static/img/user-icon.png"
     )
+
     bio = models.TextField(max_length=500, blank=True)
 
     objects = models.Manager()
 
     def __str__(self):
         return self.user.username
+
+
+# Now define Follow model using a string reference to UserProfile
+class Follow(models.Model):
+    follower = models.ForeignKey(
+        UserProfile, related_name="following", on_delete=models.CASCADE
+    )
+    following = models.ForeignKey(
+        UserProfile, related_name="followers", on_delete=models.CASCADE
+    )
 
 
 class Post(models.Model):
