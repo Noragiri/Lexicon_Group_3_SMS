@@ -13,7 +13,7 @@ from social_app.models import UserProfile, Post, Comment
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
 
-app_name = "social_app"
+app_name = "social_app"  # Used for namespacing URLs in templates
 
 
 @login_required
@@ -45,6 +45,8 @@ def user_profile(request, user_id=None):
 
         posts_with_comments.append({"post": post, "comments": comments_with_replies})
 
+    this_is_me = user_user.id == request.user.id
+
     context = {
         "user_id": user_user.id,
         "username": user_user.username,
@@ -57,6 +59,7 @@ def user_profile(request, user_id=None):
         "email": user_user.email,
         "user_profile": user_profile_info,
         "posts_with_comments": posts_with_comments,
+        "this_is_me": this_is_me,
     }
 
     return render(request, "social-app/user_profile.html", context)
@@ -178,6 +181,7 @@ def login_view(request):
 
 
 def custom_logout_view(request):
+    """Log out a user."""
     logout(request)  # Logs out the user
     return redirect("social_app:login")  # Redirect to the homepage (or another page)
 
