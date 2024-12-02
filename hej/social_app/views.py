@@ -72,14 +72,13 @@ def search_user(request):
         # users=User.object.all()
         data = None
 
-        search_query = request.GET.get("SearchQuery")
+        #search_query = request.GET.get("SearchQuery")
+        search_query =  get_object_or_404(request.GET, "SearchQuery")
 
         # using Query tool to add multiple quries to get data from model
-        # based on first name or last name enetered in search box.
-        data = User.objects.filter(Q(username__icontains=search_query))
+        data = User.objects.filter(Q(username__icontains=search_query)).select_related('userprofile')
 
         context = {"data": data}
-
         return render(request, "social-app/search.html", context)
     else:
         return render(request, "social-app/user_profile.html")
