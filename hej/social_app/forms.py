@@ -13,8 +13,11 @@ class UserForm(forms.ModelForm):
         label="Password",
         help_text="Enter your password.",
     )
+
     confirm_password = forms.CharField(
-        widget=forms.PasswordInput(),
+        widget=forms.PasswordInput(
+            attrs={"class": "form-control", "placeholder": "Password"}
+        ),
         label="Confirm Password",
         help_text="Re-enter your password for confirmation.",
     )
@@ -50,7 +53,12 @@ class UserProfileInfoForm(forms.ModelForm):
 
     bio = forms.CharField(
         widget=forms.Textarea(
-            attrs={"rows": 3, "placeholder": "Tell us about yourself"}
+            attrs={
+                "class": "form-control",
+                "placeholder": "Tell us about yourself",
+                "rows": 3,
+                "maxlength": 500,
+            }
         ),
         required=False,  # Optional field
         label="Describe yourself",
@@ -63,7 +71,12 @@ class UserProfileInfoForm(forms.ModelForm):
         fields = ("bio", "profile_pic")
         widgets = {
             "bio": forms.Textarea(
-                attrs={"class": "form-control", "placeholder": "Bio"}
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Tell us about yourself",
+                    "rows": 3,
+                    "maxlength": 500,
+                }
             ),
         }
 
