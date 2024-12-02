@@ -64,21 +64,22 @@ class UserProfileInfoForm(forms.ModelForm):
         label="Describe yourself",
     )
 
+    profile_pic = forms.ImageField(
+        widget=forms.FileInput(
+            attrs={
+                "class": "form-control",
+                "accept": "image/*",  # Accept only image files
+            }
+        ),
+        required=False,  # Optional field
+        label="Profile Picture",
+    )
+
     class Meta:
         """Specify the model and fields to include in the form"""
 
         model = UserProfile
         fields = ("bio", "profile_pic")
-        widgets = {
-            "bio": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Tell us about yourself",
-                    "rows": 3,
-                    "maxlength": 500,
-                }
-            ),
-        }
 
 
 class CommentForm(forms.ModelForm):
