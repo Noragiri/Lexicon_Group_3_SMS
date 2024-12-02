@@ -1,21 +1,37 @@
 {% extends "base/base.html" %} {% load static %}
 
 {% block content %}
+{% if data%}
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col col-8">
-            {% for data in data %}
-
-            <div class="list-group">  
-
+    {% for data in data %}
+    <div class="card mb-3">  
+        <div class="row g-3">
+            <div class="col-auto">
+                {% if data.userprofile.profile_pic%}
+                <a href="{% url 'social_app:user_profile' data.id %}" class="list-group-item list-group-item-action ">
+                    <img src="{{  data.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+                style="width: 40px; height: 40px;" />
+                </a>
+                {% else %}
+                <a href="{% url 'social_app:user_profile' data.id %}" class="list-group-item list-group-item-action ">
+                    <img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
+                style="width: 40px; height: 40px;" />
+                </a>
+                {% endif %}
+            </div>
+            <div class="col-auto">
                 <a href="{% url 'social_app:user_profile' data.id %}" class="list-group-item list-group-item-action ">{{data.username}}</a>
-
-              </div>
-            {% endfor%}
+            </div>
         </div>
-        <div class="col"></div>
     </div>
+    {% endfor%}
 </div>
 {% csrf_token %}
+{% else %}
+<div class="card mb-3">     
+    <p>No username matches with given search criteria . Try again ! </p>
+</div>
+{% endif %}
+
 {% endblock content %}

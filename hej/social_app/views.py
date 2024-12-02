@@ -13,7 +13,7 @@ from social_app.models import UserProfile, Post, Comment
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
 
 
-app_name = "social_app"
+app_name = "social_app"  # Used for namespacing URLs in templates
 
 
 @login_required
@@ -65,6 +65,8 @@ def user_profile(request, user_id=None):
 
         posts_with_comments.append({"post": post, "comments": comments_with_replies})
 
+    this_is_me = user_user.id == request.user.id
+
     context = {
         "user_id": user_user.id,
         "username": user_user.username,
@@ -77,6 +79,7 @@ def user_profile(request, user_id=None):
         "email": user_user.email,
         "user_profile": user_profile_info,
         "posts_with_comments": posts_with_comments,
+        "this_is_me": this_is_me,
     }
 
     return render(request, "social-app/user_profile.html", context)
@@ -89,14 +92,13 @@ def search_user(request):
         # users=User.object.all()
         data = None
 
-        search_query = request.GET.get("SearchQuery")
+        #search_query = request.GET.get("SearchQuery")
+        search_query =  get_object_or_404(request.GET, "SearchQuery")
 
         # using Query tool to add multiple quries to get data from model
-        # based on first name or last name enetered in search box.
-        data = User.objects.filter(Q(username__icontains=search_query))
+        data = User.objects.filter(Q(username__icontains=search_query)).select_related('userprofile')
 
         context = {"data": data}
-
         return render(request, "social-app/search.html", context)
     else:
         return render(request, "social-app/user_profile.html")
@@ -192,6 +194,7 @@ def login_view(request):
 
 
 def custom_logout_view(request):
+    """Log out a user."""
     logout(request)  # Logs out the user
     return redirect("social_app:login")  # Redirect to the homepage (or another page)
 
