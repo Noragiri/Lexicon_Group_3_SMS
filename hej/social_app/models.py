@@ -11,6 +11,8 @@ class UserProfile(models.Model):
     )
     bio = models.TextField(max_length=500, blank=True)
 
+    objects = models.Manager()
+
     def __str__(self):
         return self.user.username
 
@@ -21,8 +23,10 @@ class Post(models.Model):
     image = models.ImageField(upload_to="post_images/", blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    objects = models.Manager()
+
     def __str__(self):
-        return f"{self.pk} - {self.content[:30]}"
+        return f"{self.pk} - {str(self.content)[:30]}"
 
 
 class Comment(models.Model):
@@ -33,6 +37,8 @@ class Comment(models.Model):
     parent = models.ForeignKey(
         "self", related_name="replies", null=True, blank=True, on_delete=models.CASCADE
     )
+
+    objects = models.Manager()
 
     def __str__(self):
         return f"Comment by {self.user.username} on Post {self.post.id}"
