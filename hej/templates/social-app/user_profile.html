@@ -13,9 +13,19 @@
 	<div class="row align-items-center">
 		<div class="col-md-3 text-center">
 			{% if profile_pic %}
-			<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover" />
+			<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+				style="width: 150px; height: 150px; object-fit: cover" />
 			{% else %}
-			<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover" />
+			<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
+				style="width: 150px; height: 150px; object-fit: cover" />
+			{% endif %}
+			{% if this_is_me %}
+			<h3>Edit Your Profile</h3>
+			<form method="POST" enctype="multipart/form-data">
+				{% csrf_token %}
+				{{ form.as_p }}
+				<button type="submit" class="btn btn-primary">Save Changes</button>
+			</form>
 			{% endif %}
 		</div>
 		<div class="col-md-9">
@@ -31,10 +41,12 @@
 	<div class="row">
 		{% for item in posts_with_comments %}
 		<div class="col-md-6 mb-4">
-			<a href="{% url 'social_app:view_post' item.post.id %}" class="link-offset-2 link-underline link-underline-opacity-0">
+			<a href="{% url 'social_app:view_post' item.post.id %}"
+				class="link-offset-2 link-underline link-underline-opacity-0">
 				<div class="card">
 					{% with item.post as post %} {% if post.image %}
-					<img src="{{ post.image.url }}" class="card-img-top" alt="Post Image" style="max-height: 200px; object-fit: cover" />
+					<img src="{{ post.image.url }}" class="card-img-top" alt="Post Image"
+						style="max-height: 200px; object-fit: cover" />
 					{% endif %}
 					<div class="card-body">
 						<p class="card-text">{{ post.content|truncatechars:100 }}</p>
@@ -47,9 +59,11 @@
 							<ul class="list-group">
 								{% for comment_data in item.comments %}
 								<li class="list-group-item">
-									<strong>{{ comment_data.comment.user.username }}</strong>: {{ comment_data.comment.content }}
+									<strong>{{ comment_data.comment.user.username }}</strong>: {{
+									comment_data.comment.content }}
 									<br />
-									<small class="text-muted">Posted on {{ comment_data.comment.created_at|date:"F j, Y" }}</small>
+									<small class="text-muted">Posted on {{ comment_data.comment.created_at|date:"F j, Y"
+										}}</small>
 
 									<!-- Nested Replies -->
 									{% if comment_data.replies %}
@@ -58,7 +72,8 @@
 										<li class="list-group-item">
 											<strong>{{ reply.user.username }}</strong>: {{ reply.content }}
 											<br />
-											<small class="text-muted">Replied on {{ reply.created_at|date:"F j, Y" }}</small>
+											<small class="text-muted">Replied on {{ reply.created_at|date:"F j, Y"
+												}}</small>
 										</li>
 										{% endfor %}
 									</ul>

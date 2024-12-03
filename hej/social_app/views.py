@@ -29,13 +29,13 @@ def user_profile(request, user_id=None):
 
     user_profile_info = UserProfile.objects.filter(user=user_user).first()
 
-    if request.method == "POST" and user == request.user:
+    if request.method == "POST" and user_user == request.user:
         form = UserProfileInfoForm(
             request.POST, request.FILES, instance=user_profile_info
         )
         if form.is_valid():
             form.save()
-            return redirect("user_profile", user_id=user_user.id)
+            return redirect("social_app:user_profile", user_id=user_user.id)
     else:
         form = UserProfileInfoForm(instance=user_profile_info)
 
@@ -73,6 +73,7 @@ def user_profile(request, user_id=None):
         "posts_with_comments": posts_with_comments,
         "this_is_me": this_is_me,
         "current_user_profile_info": current_user_profile_info,
+        "form": form,
     }
 
     return render(request, "social-app/user_profile.html", context)
