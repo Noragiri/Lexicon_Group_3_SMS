@@ -80,6 +80,15 @@ class UserProfileInfoForm(forms.ModelForm):
 
         model = UserProfile
         fields = ("bio", "profile_pic")
+        widgets = {
+            "bio": forms.Textarea(
+                attrs={"class": "form-control", "placeholder": "Bio"}
+            ),
+        }
+        labels = {
+            "bio": "Bio",
+            "profile_pic": "Profile Picture",
+        }
 
 
 class CommentForm(forms.ModelForm):

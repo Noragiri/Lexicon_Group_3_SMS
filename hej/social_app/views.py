@@ -29,6 +29,16 @@ def user_profile(request, user_id=None):
 
     user_profile_info = UserProfile.objects.filter(user=user_user).first()
 
+    if request.method == "POST" and user == request.user:
+        form = UserProfileInfoForm(
+            request.POST, request.FILES, instance=user_profile_info
+        )
+        if form.is_valid():
+            form.save()
+            return redirect("user_profile", user_id=user_user.id)
+    else:
+        form = UserProfileInfoForm(instance=user_profile_info)
+
     # Fetch the user's profile and posts
     user_posts = Post.objects.filter(user=user_user).order_by("-created_at")
 
