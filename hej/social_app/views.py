@@ -33,14 +33,23 @@ def user_profile(request, user_id=None):
     posts_with_comments = []
     for post in user_posts:
         # Fetch the top-level comments for the post
-        top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+        # top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+        #     :2
+        # ]
+
+        # Fetch the top-level comments for the post and usuerprofile data for the user commwnting
+        top_level_comments = post.comments.filter(parent=None).select_related('user__userprofile').order_by("-created_at")[
             :2
-        ]
+        ] 
 
         # For each top-level comment, fetch its replies (nested comments)
         comments_with_replies = []
         for comment in top_level_comments:
-            replies = comment.replies.all().order_by("created_at")
+
+            #replies = comment.replies.all().order_by("created_at")
+            #get userprofile data along with the replies
+            replies = comment.replies.all().prefetch_related("replies").order_by("created_at")
+
             comments_with_replies.append({"comment": comment, "replies": replies})
 
         posts_with_comments.append({"post": post, "comments": comments_with_replies})
@@ -101,8 +110,48 @@ def following(request):
 
 @login_required
 def feed(request):
+    #Fetch all posts ; latest at the top  
+    feed_posts = Post.objects.all().order_by("-created_at")
+
+    posts_with_comments = []
+    for post in feed_posts:
+
+        #get user info for the post
+        users_data=get_object_or_404(User, id=post.id)
+        user_profile_info = UserProfile.objects.filter(user=users_data).first()
+        
+         # Fetch the top-level comments for the post
+        # top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+        #     :2
+        # ]    
+
+        # Fetch the top-level comments for the post and usuerprofile data for the user commwnting
+        top_level_comments = post.comments.filter(parent=None).select_related('user__userprofile').order_by("-created_at")[
+            :2
+        ] 
+
+
+        # For each top-level comment, fetch its replies (nested comments)
+        comments_with_replies = []
+        for comment in top_level_comments:
+
+            #replies = comment.replies.all().order_by("created_at")
+            #get userprofile data along with the replies
+            replies = comment.replies.all().prefetch_related("replies").order_by("created_at")
+
+            comments_with_replies.append({"comment": comment, "replies": replies})
+
+        posts_with_comments.append({"post": post, "comments": comments_with_replies,'user_profile_info':user_profile_info})
+
+    #this_is_me = user_user.id == request.user.id
+
+    context = {
+        "posts_with_comments": posts_with_comments,
+    }
+
     """Render the search page."""
-    return render(request, "social-app/feed.html")
+    return render(request, "social-app/feed.html",context)
+
 
 
 def register(request):
