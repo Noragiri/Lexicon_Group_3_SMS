@@ -20,6 +20,8 @@ app_name = "social_app"  # Used for namespacing URLs in templates
 def user_profile(request, user_id=None):
     """Render the user profile with posts and nested comments."""
 
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+
     if user_id is None:
         user_user = request.user
     else:
@@ -69,6 +71,7 @@ def user_profile(request, user_id=None):
         "user_profile": user_profile_info,
         "posts_with_comments": posts_with_comments,
         "this_is_me": this_is_me,
+        "current_user_profile_info": current_user_profile_info,
     }
 
     return render(request, "social-app/user_profile.html", context)
@@ -76,21 +79,28 @@ def user_profile(request, user_id=None):
 
 @login_required
 def search_user(request):
+    """Render the search page."""
+
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+
     if "SearchQuery" in request.GET:
         # get all users
         # users=User.object.all()
         data = None
 
-        #search_query = request.GET.get("SearchQuery")
-        search_query =  get_object_or_404(request.GET, "SearchQuery")
+        # search_query = request.GET.get("SearchQuery")
+        search_query = get_object_or_404(request.GET, "SearchQuery")
 
         # using Query tool to add multiple quries to get data from model
-        data = User.objects.filter(Q(username__icontains=search_query)).select_related('userprofile')
+        data = User.objects.filter(Q(username__icontains=search_query)).select_related(
+            "userprofile"
+        )
 
-        context = {"data": data}
+        context = {"data": data, "current_user_profile_info": current_user_profile_info}
         return render(request, "social-app/search.html", context)
     else:
-        return render(request, "social-app/user_profile.html")
+        context = {"current_user_profile_info": current_user_profile_info}
+        return render(request, "social-app/user_profile.html", context)
         # return HttpResponse("No search query provided.")
 
     return HttpResponse("Invalid request method.")
@@ -99,13 +109,21 @@ def search_user(request):
 @login_required
 def followers(request):
     """Render the search page."""
-    return render(request, "social-app/followers.html")
+
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+    context = {"current_user_profile_info": current_user_profile_info}
+
+    return render(request, "social-app/followers.html", context)
 
 
 @login_required
 def following(request):
     """Render the search page."""
-    return render(request, "social-app/following.html")
+
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+    context = {"current_user_profile_info": current_user_profile_info}
+
+    return render(request, "social-app/following.html", context)
 
 
 @login_required
@@ -150,8 +168,11 @@ def feed(request):
     }
 
     """Render the search page."""
-    return render(request, "social-app/feed.html",context)
 
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+    context = {"current_user_profile_info": current_user_profile_info}
+
+    return render(request, "social-app/feed.html", context)
 
 
 def register(request):
@@ -237,6 +258,9 @@ def custom_logout_view(request):
 @login_required
 def view_post(request, post_id):
     """View a specific post and handle comments."""
+
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+
     post = get_object_or_404(Post, id=post_id)
     comments = post.comments.all().order_by("-created_at")
     new_comment = None
@@ -260,5 +284,6 @@ def view_post(request, post_id):
             "post": post,
             "comments": comments,
             "comment_form": comment_form,
+            "current_user_profile_info": current_user_profile_info,
         },
     )
