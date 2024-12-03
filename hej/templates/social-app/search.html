@@ -7,7 +7,7 @@
     {% for data in data %}
     <div class="card mb-3">  
         <div class="row g-3">
-            <div class="col-auto">
+            <div class="col-auto ">
                 {% if data.userprofile.profile_pic%}
                 <a href="{% url 'social_app:user_profile' data.id %}" class="list-group-item list-group-item-action ">
                     <img src="{{  data.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
@@ -20,8 +20,8 @@
                 </a>
                 {% endif %}
             </div>
-            <div class="col-auto">
-                <a href="{% url 'social_app:user_profile' data.id %}" class="list-group-item list-group-item-action ">{{data.username}}</a>
+            <div class="col-auto ">
+                <a href="{% url 'social_app:user_profile' data.id %}" class="list-group-item list-group-item-action "><strong>{{data.username}}</strong></a>
             </div>
         </div>
     </div>
