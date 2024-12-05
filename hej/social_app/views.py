@@ -200,20 +200,18 @@ def register(request):
                 user.set_password(user.password)
                 user.save()
 
-                # Save profile instance
-                profile = profile_form.save(commit=False)
-                profile.user = user
-
                 # Save profile picture if provided
-                # if "profile_picture" in request.FILES:
-                #     profile.profile_picture = request.FILES["profile_picture"]
+                user_profile_info = UserProfile.objects.filter(user=user).first()
 
-                if "profile_pic" in request.FILES:
-                     profile.profile_pic = request.FILES["profile_pic"]
+                if "profile_pic" in request.FILES:   
+                     user_profile_info.profile_pic = request.FILES["profile_pic"]
+                     user_profile_info.save()
 
+                #save the bio provided in form
+                if "bio" in profile_form.cleaned_data:   
+                     user_profile_info.bio =profile_form.cleaned_data['bio']
+                     user_profile_info.save()
 
-
-                profile.save()
                 registered = True
 
             except ValidationError as e:
