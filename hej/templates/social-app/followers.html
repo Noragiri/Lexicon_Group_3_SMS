@@ -1,11 +1,12 @@
-{% extends "base/base.html" %} {% load static %} {% block content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col col-8">
-			<h1>Followers</h1>
-			{% include "social-app/modules/simple_user_list.html" %}
-		</div>
-		<div class="col"></div>
-	</div>
+{% extends "base/base.html" %} {% block content %}
+<div class="container">
+	<h1>{{ user_profile.username }} followers</h1>
+	{% if followers_list %}
+	<ul>
+		{% for follow in followers_list %}
+		<li>{{ follow.follower.username }}</li>
+		{% endfor %}
+	</ul>
+	{% else %} {% endif %}
 </div>
 {% endblock %}

@@ -1,11 +1,15 @@
-{% extends "base/base.html" %} {% load static %} {% block content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col col-8">
-			<h1>Following</h1>
-			{% include "social-app/modules/simple_user_list.html" %}
-		</div>
-		<div class="col"></div>
-	</div>
+{% extends "base/base.html" %} {% block content %}
+<div class="container">
+	<h1>{{ user_profile.username }} is following:</h1>
+
+	{% if following_list %}
+	<ul>
+		{% for follow in following_list %}
+		<li>{{ follow.user_being_followed.username }}</li>
+		{% endfor %}
+	</ul>
+	{% else %}
+	<p>No following yet.</p>
+	{% endif %}
 </div>
 {% endblock %}

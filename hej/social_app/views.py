@@ -1,19 +1,76 @@
 """ Views for the social app. """
 
+import logging
+
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from social_app.models import UserProfile, Post, Comment
+from social_app.models import UserProfile, Post, Comment, User, UserFollow
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm, PostForm
 
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 app_name = "social_app"  # Used for namespacing URLs in templates
+
+
+@login_required
+def follow_user(request, user_id):
+    """Follow or unfollow a user."""
+    user_being_followed = get_object_or_404(User, id=user_id)
+    if request.user != user_being_followed:
+        print("user_being_followed", user_being_followed, "by", request.user)
+        UserFollow.objects.create(
+            follower=request.user, user_being_followed=user_being_followed
+        )
+
+        return redirect("social_app:user_profile", user_id=user_id)
+    return redirect("social_app:feed")
+
+
+@login_required
+def followers(request, user_id=None):
+    """Render the followers list for a user."""
+    if user_id is None:
+        user_id = request.user.id
+
+    user = get_object_or_404(User, id=user_id)
+    followers_list = UserFollow.objects.filter(user_being_followed=user)
+
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+    context = {
+        "current_user_profile_info": current_user_profile_info,
+        "user_profile": user,
+        "followers_list": followers_list,
+    }
+
+    return render(request, "social-app/followers.html", context)
+
+
+def following(request, user_id=None):
+    """Render the followinf list for a user."""
+    if user_id is None:
+        user_id = request.user.id
+
+    user = get_object_or_404(User, id=user_id)
+
+    following_list = UserFollow.objects.filter(follower=user)
+
+    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
+
+    context = {
+        "current_user_profile_info": current_user_profile_info,
+        "user_profile": user,
+        "following_list": following_list,
+    }
+    return render(request, "social-app/following.html", context)
 
 
 @login_required
@@ -122,26 +179,6 @@ def search_user(request):
 
 
 @login_required
-def followers(request):
-    """Render the search page."""
-
-    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
-    context = {"current_user_profile_info": current_user_profile_info}
-
-    return render(request, "social-app/followers.html", context)
-
-
-@login_required
-def following(request):
-    """Render the search page."""
-
-    current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
-    context = {"current_user_profile_info": current_user_profile_info}
-
-    return render(request, "social-app/following.html", context)
-
-
-@login_required
 def feed(request):
     # Fetch all posts ; latest at the top
     feed_posts = Post.objects.all().order_by("-created_at")
@@ -149,8 +186,8 @@ def feed(request):
     posts_with_comments = []
     for post in feed_posts:
 
-        #get user info for the post
-        users_data=get_object_or_404(User, username=post.user)
+        # get user info for the post
+        users_data = get_object_or_404(User, username=post.user)
 
         user_profile_info = UserProfile.objects.filter(user=users_data).first()
 
@@ -164,6 +201,7 @@ def feed(request):
         # For each top-level comment, fetch its replies (nested comments)
         comments_with_replies = []
         for comment in top_level_comments:
+
             # get userprofile data along with the replies
             replies = (
                 comment.replies.all().prefetch_related("replies").order_by("created_at")
@@ -178,8 +216,6 @@ def feed(request):
                 "user_profile_info": user_profile_info,
             }
         )
-
-    """Render the search page."""
 
     current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
     context = {
