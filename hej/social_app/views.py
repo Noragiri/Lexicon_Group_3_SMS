@@ -135,7 +135,7 @@ def feed(request):
     for post in feed_posts:
 
         #get user info for the post
-        users_data=get_object_or_404(User, id=post.id)
+        users_data=get_object_or_404(User, username=post.user)
         user_profile_info = UserProfile.objects.filter(user=users_data).first()
         
          # Fetch the top-level comments for the post
