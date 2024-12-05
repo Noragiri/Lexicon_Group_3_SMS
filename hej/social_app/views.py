@@ -163,14 +163,14 @@ def feed(request):
 
     #this_is_me = user_user.id == request.user.id
 
-    context = {
-        "posts_with_comments": posts_with_comments,
-    }
+    # context = {
+    #     "posts_with_comments": posts_with_comments,
+    # }
 
     """Render the search page."""
 
     current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
-    context = {"current_user_profile_info": current_user_profile_info}
+    context = {"current_user_profile_info": current_user_profile_info,"posts_with_comments": posts_with_comments,}
 
     return render(request, "social-app/feed.html", context)
 
