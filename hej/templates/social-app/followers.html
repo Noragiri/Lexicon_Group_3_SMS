@@ -1,22 +1,27 @@
-{% extends "base/base.html" %} {% load static %} {% block content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col col-8">
-			<h1>{{ user_profile.username }} Followers</h1>
+{% extends "base/base.html" %}
 
-			<!-- Display the list of followers -->
-			<ul>
-				{% for follower in followers_list %}
-				<li>{{ follower.username }}</li>
-				{% empty %}
-				<li>No followers yet.</li>
-				{% endfor %}
-			</ul>
-
-			<!-- You can keep the simple_user_list inclusion if you'd like to reuse the user listing UI -->
-			{% include "social-app/modules/simple_user_list.html" %}
-		</div>
-		<div class="col"></div>
-	</div>
+{% block content %}
+<div class="container">
+    <h1>{{ user_profile.username }} Followers</h1>
+    {% if followers_list %}
+    <ul>
+        {% for follow in followers_list %}
+        <li>
+            {{ follow.user.username }}
+			{% if follow.user != request.user %}
+            <form method="POST" action="{% url 'social_app:toggle_follow' user_id=follow.user.id %}" style="display:inline;">
+                {% csrf_token %}
+                {% if follow.user in request.user.following.all %}
+                <button type="submit" class="btn btn-danger">Unfollow</button>
+                {% else %}
+                <button type="submit" class="btn btn-primary">Follow</button>
+            {% if follow.user != request.user %}
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No followers yet.</p>
+    {% endif %}
 </div>
 {% endblock %}

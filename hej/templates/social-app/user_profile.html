@@ -9,6 +9,11 @@
 	<div class="alert alert-info" role="alert">Just to show that this is my own profile</div>
 	{% endif %}
 
+	{% if this_is_me %}
+	<a href="{% url 'social_app:follow_user' %}">Follow</a>
+
+	{% endif %}
+
 	<!-- Profile Header -->
 	<div class="row align-items-center">
 		<div class="col-md-3 text-center">

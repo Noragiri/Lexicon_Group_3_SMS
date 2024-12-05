@@ -1,22 +1,30 @@
-{% extends "base/base.html" %} {% block content %}
-<div class="container-fluid">
-	<div class="row">
-		<div class="col col-8">
-			<h1>{{ user_profile.user.username }}'s Following</h1>
+{% extends "base/base.html" %}
 
-			<!-- Display the list of users this user is following -->
-			{% if following_list %}
-			<ul>
-				{% for follow in following_list %}
-				<li>{{ follow.following.user.username }}</li>
-				<!-- Display the username of the user being followed -->
-				{% endfor %}
-			</ul>
-			{% else %}
-			<p>No following yet.</p>
-			{% endif %}
-		</div>
-		<div class="col"></div>
-	</div>
+{% block content %}
+<div class="container">
+    <h1>{{ user_profile.username }}'s Following</h1>
+    
+    {% if following_list %}
+    <ul>
+        {% for follow in following_list %}
+        <li>
+            {{ follow.following.username }}
+         
+            {% if follow.following != request.user %}
+            <form method="POST" action="{% url 'social_app:toggle_follow' user_id=follow.following.id %}" style="display:inline;">
+                {% csrf_token %}
+                {% if follow.following in request.user.following.all %}
+                <button type="submit" class="btn btn-danger">Unfollow</button>
+                {% else %}
+                <button type="submit" class="btn btn-primary">Follow</button>
+                {% endif %}
+            </form>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No following yet.</p>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,6 +1,7 @@
 """ URL Configuration for social_app app. """
 
 from django.urls import path, include
+from . import views
 from social_app.views import (
     user_profile,
     followers,
@@ -38,4 +39,5 @@ urlpatterns = [
     path("search/", search_user, name="search_user"),
     path("logout/", custom_logout_view, name="logout"),
     path("post/<int:post_id>/", view_post, name="view_post"),
+    path('follow/<int:user_id>/', views.toggle_follow, name='toggle_follow'),
 ]

@@ -21,12 +21,14 @@ class UserProfile(models.Model):
 
 # Now define Follow model using a string reference to UserProfile
 class Follow(models.Model):
+    user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
     follower = models.ForeignKey(
         UserProfile, related_name="following", on_delete=models.CASCADE
     )
-    following = models.ForeignKey(
-        UserProfile, related_name="followers", on_delete=models.CASCADE
-    )
+    following = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.user.username} follows {self.following.username}"
 
 
 class Post(models.Model):

@@ -11,9 +11,31 @@ from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
 from social_app.models import UserProfile, Post, Comment
 from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
+from django.shortcuts import render, get_object_or_404
+from .models import User, Follow
 
 
 app_name = "social_app"  # Used for namespacing URLs in templates
+
+def followers(request, user_id):
+    user = get_object_or_404(User, id=user_id) 
+    followers_list = Follow.objects.filter(following=user)  
+    
+    context = {
+        'user_profile': user,
+        'followers_list': followers_list
+    }
+    return render(request, 'social_app/followers.html', context)
+
+def following(request, user_id):
+    user = get_object_or_404(User, id=user_id)  
+    following_list = Follow.objects.filter(user=user)  
+    
+    context = {
+        'user_profile': user,
+        'following_list': following_list
+    }
+    return render(request, 'social_app/following.html', context)
 
 
 @login_required
@@ -25,15 +47,30 @@ def followers(request, user_id):
 
     return render(request, "social-app/followers.html")
 
+@login_required
+def toggle_follow(request, user_id):
+    """Toggle the follow status between two users."""
+    user_to_follow = get_object_or_404(User, id=user_id)
+
+    if request.user != user_to_follow:
+        follow = Follow.objects.filter(user=request.user, following=user_to_follow)
+        
+        if follow.exists():
+            follow.delete()
+        else:
+            Follow.objects.create(user=request.user, following=user_to_follow)
+    return redirect('social_app:following', user_id=request.user.id)
+
 
 @login_required
 def follow_user(request, user_id):
-    """Render the followers list for a user."""
-    # user = get_object_or_404(User, id=user_id)
-    # user_profile = get_object_or_404(UserProfile, user=user)
-    # user = User.objects.get(id=user_id)
-
-    return render(request, "social-app/followers.html")
+    user_to_follow = get_object_or_404(User, id=user_id)
+    if request.user != user_to_follow:  
+        follow, created = Follow.objects.get_or_create(user=request.user, following=user_to_follow)
+        if not created:
+            follow.delete()  
+        return redirect('social_app:user_profile', user_id=user_id)
+    return redirect('social_app:feed')
 
 
 @login_required
