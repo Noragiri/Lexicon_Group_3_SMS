@@ -316,7 +316,7 @@ def view_post(request, post_id):
     current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
 
     post = get_object_or_404(Post, id=post_id)
-    comments = post.comments.all().order_by("-created_at")
+    comments = post.comments.filter(parent=None).order_by("-created_at")
     new_comment = None
 
     if request.method == "POST":
@@ -325,19 +325,24 @@ def view_post(request, post_id):
             new_comment = comment_form.save(commit=False)
             new_comment.post = post
             new_comment.user = request.user
+            parent_id = request.POST.get("parent_id")
+            if parent_id:
+                new_comment.parent = Comment.objects.get(id=parent_id)
             new_comment.save()
             messages.success(request, "Comment added successfully.")
             return redirect("social_app:view_post", post_id=post.id)
     else:
         comment_form = CommentForm()
 
+    context = {
+        "post": post,
+        "comments": comments,
+        "comment_form": comment_form,
+        "current_user_profile_info": current_user_profile_info,
+    }
+
     return render(
         request,
         "social-app/view_post.html",
-        {
-            "post": post,
-            "comments": comments,
-            "comment_form": comment_form,
-            "current_user_profile_info": current_user_profile_info,
-        },
+        context,
     )

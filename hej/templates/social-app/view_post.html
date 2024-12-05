@@ -1,39 +1,41 @@
 {% extends "base/base.html" %}
 
 {% block content %}
-<div class="post-detail">
-    <h1>Post by : {{ post.user }}</h1>
-    <p><strong>Created at:</strong> {{ post.created_at }}</p>
-    <div class="post-content">
-        <p>{{ post.content }}</p>
-        {% if post.image %}
-        <img src="{{ post.image.url }}" alt="Post Image" />
-        {% endif %}
+<div class="container mt-4">
+    <div class="post-detail card mb-4">
+        <div class="card-body">
+            <h1 class="card-title">Post by {{ post.user.username }}</h1>
+            <p class="card-text"><strong>Created at:</strong> {{ post.created_at|date:"F j, Y, g:i a" }}</p>
+            <div class="post-content">
+                <p>{{ post.content }}</p>
+                {% if post.image %}
+                <img src="{{ post.image.url }}" alt="Post Image" class="img-fluid mt-3" />
+                {% endif %}
+            </div>
+        </div>
     </div>
-</div>
 
-<div class="comments-section">
-    <h2>Comments</h2>
-    {% if comments %}
-    <ul>
-        {% for comment in comments %}
-        <li>
-            <p><strong>{{ comment.user.username }}</strong> ({{ comment.created_at|date:"F j, Y, g:i a" }})</p>
-            <p>{{ comment.content }}</p>
-        </li>
-        {% endfor %}
-    </ul>
-    {% else %}
-    <p>No comments yet. Be the first to comment!</p>
-    {% endif %}
-</div>
-
-<div class="add-comment">
-    <h2>Add a Comment</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ comment_form.as_p }}
-        <button type="submit">Post Comment</button>
-    </form>
+    <div class="comments-section card mb-4">
+        <div class="card-body">
+            <h2 class="card-title">Comments</h2>
+            {% if comments %}
+            <ul class="list-group list-group-flush">
+                {% for comment in comments %}
+                {% include "_comment.html" with comment=comment %}
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted">No comments yet. Be the first to comment!</p>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <h2 class="card-title">Add a Comment</h2>
+            <form method="post">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
