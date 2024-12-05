@@ -205,8 +205,13 @@ def register(request):
                 profile.user = user
 
                 # Save profile picture if provided
-                if "profile_picture" in request.FILES:
-                    profile.profile_picture = request.FILES["profile_picture"]
+                # if "profile_picture" in request.FILES:
+                #     profile.profile_picture = request.FILES["profile_picture"]
+
+                if "profile_pic" in request.FILES:
+                     profile.profile_pic = request.FILES["profile_pic"]
+
+
 
                 profile.save()
                 registered = True
