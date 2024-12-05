@@ -1,19 +1,19 @@
 """ Views for the social app. """
 
 import logging
+
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.paginator import Paginator
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.db import IntegrityError
 from django.shortcuts import render, get_object_or_404, HttpResponse, redirect
-from social_app.models import UserProfile, Post, Comment
-from social_app.forms import UserForm, UserProfileInfoForm, CommentForm
-from django.shortcuts import render, get_object_or_404
-from .models import User, UserFollow
+from social_app.models import UserProfile, Post, Comment, User, UserFollow
+from social_app.forms import UserForm, UserProfileInfoForm, CommentForm, PostForm
+
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -86,15 +86,30 @@ def user_profile(request, user_id=None):
 
     user_profile_info = UserProfile.objects.filter(user=user_user).first()
 
+    profile_edit_form = UserProfileInfoForm(instance=user_profile_info)
+    post_form = PostForm()
+
+    if request.method == "POST" and user_user == request.user:
+        if "profile_edit_form_submit" in request.POST:
+            profile_edit_form = UserProfileInfoForm(
+                request.POST, request.FILES, instance=user_profile_info
+            )
+            if profile_edit_form.is_valid():
+                profile_edit_form.save()
+                return redirect("social_app:user_profile", user_id=user_user.id)
+        elif "post_form_submit" in request.POST:
+            post_form = PostForm(request.POST, request.FILES)
+            if post_form.is_valid():
+                post = post_form.save(commit=False)
+                post.user = request.user
+                post.save()
+                return redirect("social_app:user_profile", user_id=user_user.id)
+
     # Fetch the user's profile and posts
     user_posts = Post.objects.filter(user=user_user).order_by("-created_at")
 
     posts_with_comments = []
     for post in user_posts:
-        # Fetch the top-level comments for the post
-        # top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
-        #     :2
-        # ]
 
         # Fetch the top-level comments for the post and usuerprofile data for the user commwnting
         top_level_comments = (
@@ -106,8 +121,6 @@ def user_profile(request, user_id=None):
         # For each top-level comment, fetch its replies (nested comments)
         comments_with_replies = []
         for comment in top_level_comments:
-
-            # replies = comment.replies.all().order_by("created_at")
             # get userprofile data along with the replies
             replies = (
                 comment.replies.all().prefetch_related("replies").order_by("created_at")
@@ -133,6 +146,8 @@ def user_profile(request, user_id=None):
         "posts_with_comments": posts_with_comments,
         "this_is_me": this_is_me,
         "current_user_profile_info": current_user_profile_info,
+        "profile_edit_form": profile_edit_form,
+        "post_form": post_form,
     }
 
     return render(request, "social-app/user_profile.html", context)
@@ -146,7 +161,6 @@ def search_user(request):
 
     if "SearchQuery" in request.GET:
         # get all users
-        # users=User.object.all()
         data = None
 
         # search_query = request.GET.get("SearchQuery")
@@ -162,9 +176,6 @@ def search_user(request):
     else:
         context = {"current_user_profile_info": current_user_profile_info}
         return render(request, "social-app/user_profile.html", context)
-        # return HttpResponse("No search query provided.")
-
-    return HttpResponse("Invalid request method.")
 
 
 @login_required
@@ -176,13 +187,9 @@ def feed(request):
     for post in feed_posts:
 
         # get user info for the post
-        users_data = get_object_or_404(User, id=post.id)
-        user_profile_info = UserProfile.objects.filter(user=users_data).first()
+        users_data = get_object_or_404(User, username=post.user)
 
-        # Fetch the top-level comments for the post
-        # top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
-        #     :2
-        # ]
+        user_profile_info = UserProfile.objects.filter(user=users_data).first()
 
         # Fetch the top-level comments for the post and usuerprofile data for the user commwnting
         top_level_comments = (
@@ -195,7 +202,6 @@ def feed(request):
         comments_with_replies = []
         for comment in top_level_comments:
 
-            # replies = comment.replies.all().order_by("created_at")
             # get userprofile data along with the replies
             replies = (
                 comment.replies.all().prefetch_related("replies").order_by("created_at")
@@ -210,14 +216,6 @@ def feed(request):
                 "user_profile_info": user_profile_info,
             }
         )
-
-    # this_is_me = user_user.id == request.user.id
-
-    # context = {
-    #     "posts_with_comments": posts_with_comments,
-    # }
-
-    """Render the search page."""
 
     current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
     context = {
