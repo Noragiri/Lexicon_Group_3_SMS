@@ -13,9 +13,39 @@
 	<div class="row align-items-center">
 		<div class="col-md-3 text-center">
 			{% if profile_pic %}
-			<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover" />
+			<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+				style="width: 150px; height: 150px; object-fit: cover" />
 			{% else %}
-			<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px; object-fit: cover" />
+			<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
+				style="width: 150px; height: 150px; object-fit: cover" />
+			{% endif %}
+			{% if this_is_me %}
+			<h3>Edit Your Profile</h3>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editProfileModal">
+				Edit Profile
+			</button>
+
+			<!-- Modal -->
+			<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog"
+				aria-labelledby="editProfileModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title" id="editProfileModalLabel">Edit Your Profile</h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<form method="POST" enctype="multipart/form-data">
+								{% csrf_token %}
+								{{ form.as_p }}
+								<button type="submit" class="btn btn-primary">Save Changes</button>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
 			{% endif %}
 		</div>
 		<div class="col-md-9">
@@ -31,10 +61,12 @@
 	<div class="row g-4">
 		{% for item in posts_with_comments %}
 		<div class="col-8">
-			<a href="{% url 'social_app:view_post' item.post.id %}" class="link-offset-2 link-underline link-underline-opacity-0">
+			<a href="{% url 'social_app:view_post' item.post.id %}"
+				class="link-offset-2 link-underline link-underline-opacity-0">
 				<div class="card">
 					{% with item.post as post %} {% if post.image %}
-					<img src="{{ post.image.url }}" class="card-img-top" alt="Post Image" style="max-height: 200px; object-fit: cover" />
+					<img src="{{ post.image.url }}" class="card-img-top" alt="Post Image"
+						style="max-height: 200px; object-fit: cover" />
 					{% endif %}
 
 					<!-- Display userid, profilepic -->
@@ -42,15 +74,15 @@
 						<div class="row g-3">
 							<div class="col-auto">
 								{% if profile_pic %}
-								<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
-								style="width: 40px; height: 40px;" />
+								<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture"
+									class="img-fluid rounded-circle" style="width: 40px; height: 40px;" />
 								{% else %}
-								<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
-								style="width: 40px; height: 40px;" />
+								<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture"
+									class="img-fluid rounded-circle" style="width: 40px; height: 40px;" />
 								{% endif %}
 							</div>
 							<div class="col-auto">
-								 <p class="card-text"><strong>{{username}}</strong></p>
+								<p class="card-text"><strong>{{username}}</strong></p>
 							</div>
 						</div>
 					</div>
@@ -69,16 +101,19 @@
 								<li class="list-group-item">
 									<!-- for profile pic -->
 									{% if comment_data.comment.user.userprofile.profile_pic %}
-									<img src="{{  comment_data.comment.user.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
-									style="width: 20px; height: 20px;" />
+									<img src="{{  comment_data.comment.user.userprofile.profile_pic.url }}"
+										alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+										style="width: 20px; height: 20px;" />
 									{% else %}
-									<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
-									style="width: 20px; height: 20px;" />
+									<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture"
+										class="img-fluid rounded-circle" style="width: 20px; height: 20px;" />
 									{% endif %}
 									<!-- for profile pic -END -->
-									<strong>{{ comment_data.comment.user.username }}</strong>: {{ comment_data.comment.content }}
+									<strong>{{ comment_data.comment.user.username }}</strong>: {{
+									comment_data.comment.content }}
 									<br />
-									<small class="text-muted">Posted on {{ comment_data.comment.created_at|date:"F j, Y" }}</small>
+									<small class="text-muted">Posted on {{ comment_data.comment.created_at|date:"F j, Y"
+										}}</small>
 
 									<!-- Nested Replies -->
 									{% if comment_data.replies %}
@@ -87,16 +122,18 @@
 										<li class="list-group-item">
 											<!-- for profile pic -->
 											{% if reply.user.userprofile.profile_pic %}
-											<img src="{{  reply.user.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
-											style="width: 20px; height: 20px;" />
+											<img src="{{  reply.user.userprofile.profile_pic.url }}"
+												alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+												style="width: 20px; height: 20px;" />
 											{% else %}
-											<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
-											style="width: 20px; height: 20px;" />
+											<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture"
+												class="img-fluid rounded-circle" style="width: 20px; height: 20px;" />
 											{% endif %}
 											<!-- for profile pic -END -->
 											<strong>{{ reply.user.username }}</strong>: {{ reply.content }}
 											<br />
-											<small class="text-muted">Replied on {{ reply.created_at|date:"F j, Y" }}</small>
+											<small class="text-muted">Replied on {{ reply.created_at|date:"F j, Y"
+												}}</small>
 										</li>
 										{% endfor %}
 									</ul>
