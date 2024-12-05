@@ -1,3 +1,5 @@
+""" Models for the social_app app """
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -6,15 +8,37 @@ class UserProfile(models.Model):
     """Model representing a user profile"""
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+
     profile_pic = models.ImageField(
         upload_to="profile_pics/", default="../static/img/user-icon.png"
     )
+
     bio = models.TextField(max_length=500, blank=True)
 
     objects = models.Manager()
 
     def __str__(self):
         return self.user.username
+
+
+class UserFollow(models.Model):
+    """Model representing a user following another user"""
+
+    # The user who is following
+    follower = models.ForeignKey(
+        User, related_name="following", on_delete=models.CASCADE
+    )
+
+    # The user who is being followed
+    user_being_followed = models.ForeignKey(
+        User, related_name="followers", on_delete=models.CASCADE
+    )
+
+    objects = models.Manager()
+
+    def __str__(self):
+        """String for representing the Follow object"""
+        return f"{self.follower} follows {self.user_being_followed}"
 
 
 class Post(models.Model):
