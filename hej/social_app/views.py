@@ -45,14 +45,23 @@ def user_profile(request, user_id=None):
     posts_with_comments = []
     for post in user_posts:
         # Fetch the top-level comments for the post
-        top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+        # top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+        #     :2
+        # ]
+
+        # Fetch the top-level comments for the post and usuerprofile data for the user commwnting
+        top_level_comments = post.comments.filter(parent=None).select_related('user__userprofile').order_by("-created_at")[
             :2
-        ]
+        ] 
 
         # For each top-level comment, fetch its replies (nested comments)
         comments_with_replies = []
         for comment in top_level_comments:
-            replies = comment.replies.all().order_by("created_at")
+
+            #replies = comment.replies.all().order_by("created_at")
+            #get userprofile data along with the replies
+            replies = comment.replies.all().prefetch_related("replies").order_by("created_at")
+
             comments_with_replies.append({"comment": comment, "replies": replies})
 
         posts_with_comments.append({"post": post, "comments": comments_with_replies})
@@ -130,10 +139,49 @@ def following(request):
 
 @login_required
 def feed(request):
+    #Fetch all posts ; latest at the top  
+    feed_posts = Post.objects.all().order_by("-created_at")
+
+    posts_with_comments = []
+    for post in feed_posts:
+
+        #get user info for the post
+        users_data=get_object_or_404(User, id=post.id)
+        user_profile_info = UserProfile.objects.filter(user=users_data).first()
+        
+         # Fetch the top-level comments for the post
+        # top_level_comments = post.comments.filter(parent=None).order_by("-created_at")[
+        #     :2
+        # ]    
+
+        # Fetch the top-level comments for the post and usuerprofile data for the user commwnting
+        top_level_comments = post.comments.filter(parent=None).select_related('user__userprofile').order_by("-created_at")[
+            :2
+        ] 
+
+
+        # For each top-level comment, fetch its replies (nested comments)
+        comments_with_replies = []
+        for comment in top_level_comments:
+
+            #replies = comment.replies.all().order_by("created_at")
+            #get userprofile data along with the replies
+            replies = comment.replies.all().prefetch_related("replies").order_by("created_at")
+
+            comments_with_replies.append({"comment": comment, "replies": replies})
+
+        posts_with_comments.append({"post": post, "comments": comments_with_replies,'user_profile_info':user_profile_info})
+
+    #this_is_me = user_user.id == request.user.id
+
+    # context = {
+    #     "posts_with_comments": posts_with_comments,
+    # }
+
     """Render the search page."""
 
     current_user_profile_info = UserProfile.objects.filter(user=request.user).first()
-    context = {"current_user_profile_info": current_user_profile_info}
+    context = {"current_user_profile_info": current_user_profile_info,"posts_with_comments": posts_with_comments,}
 
     return render(request, "social-app/feed.html", context)
 
@@ -163,15 +211,18 @@ def register(request):
                 user.set_password(user.password)
                 user.save()
 
-                # Save profile instance
-                profile = profile_form.save(commit=False)
-                profile.user = user
-
                 # Save profile picture if provided
-                if "profile_picture" in request.FILES:
-                    profile.profile_picture = request.FILES["profile_picture"]
+                user_profile_info = UserProfile.objects.filter(user=user).first()
 
-                profile.save()
+                if "profile_pic" in request.FILES:   
+                     user_profile_info.profile_pic = request.FILES["profile_pic"]
+                     user_profile_info.save()
+
+                #save the bio provided in form
+                if "bio" in profile_form.cleaned_data:   
+                     user_profile_info.bio =profile_form.cleaned_data['bio']
+                     user_profile_info.save()
+
                 registered = True
 
             except ValidationError as e:

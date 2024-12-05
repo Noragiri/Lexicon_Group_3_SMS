@@ -58,9 +58,9 @@
 	<hr class="my-4" />
 
 	<!-- User Posts -->
-	<div class="row">
+	<div class="row g-4">
 		{% for item in posts_with_comments %}
-		<div class="col-md-6 mb-4">
+		<div class="col-8">
 			<a href="{% url 'social_app:view_post' item.post.id %}"
 				class="link-offset-2 link-underline link-underline-opacity-0">
 				<div class="card">
@@ -68,6 +68,26 @@
 					<img src="{{ post.image.url }}" class="card-img-top" alt="Post Image"
 						style="max-height: 200px; object-fit: cover" />
 					{% endif %}
+
+					<!-- Display userid, profilepic -->
+					<div class="card">
+						<div class="row g-3">
+							<div class="col-auto">
+								{% if profile_pic %}
+								<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture"
+									class="img-fluid rounded-circle" style="width: 40px; height: 40px;" />
+								{% else %}
+								<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture"
+									class="img-fluid rounded-circle" style="width: 40px; height: 40px;" />
+								{% endif %}
+							</div>
+							<div class="col-auto">
+								<p class="card-text"><strong>{{username}}</strong></p>
+							</div>
+						</div>
+					</div>
+					<!-- Display userid, profilepic END -->
+
 					<div class="card-body">
 						<p class="card-text">{{ post.content|truncatechars:100 }}</p>
 					</div>
@@ -79,6 +99,16 @@
 							<ul class="list-group">
 								{% for comment_data in item.comments %}
 								<li class="list-group-item">
+									<!-- for profile pic -->
+									{% if comment_data.comment.user.userprofile.profile_pic %}
+									<img src="{{  comment_data.comment.user.userprofile.profile_pic.url }}"
+										alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+										style="width: 20px; height: 20px;" />
+									{% else %}
+									<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture"
+										class="img-fluid rounded-circle" style="width: 20px; height: 20px;" />
+									{% endif %}
+									<!-- for profile pic -END -->
 									<strong>{{ comment_data.comment.user.username }}</strong>: {{
 									comment_data.comment.content }}
 									<br />
@@ -90,6 +120,16 @@
 									<ul class="list-group mt-3">
 										{% for reply in comment_data.replies %}
 										<li class="list-group-item">
+											<!-- for profile pic -->
+											{% if reply.user.userprofile.profile_pic %}
+											<img src="{{  reply.user.userprofile.profile_pic.url }}"
+												alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
+												style="width: 20px; height: 20px;" />
+											{% else %}
+											<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture"
+												class="img-fluid rounded-circle" style="width: 20px; height: 20px;" />
+											{% endif %}
+											<!-- for profile pic -END -->
 											<strong>{{ reply.user.username }}</strong>: {{ reply.content }}
 											<br />
 											<small class="text-muted">Replied on {{ reply.created_at|date:"F j, Y"
