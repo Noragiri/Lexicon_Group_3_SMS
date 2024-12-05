@@ -33,10 +33,7 @@ def user_profile(request, user_id=None):
     post_form = PostForm()
 
     if request.method == "POST" and user_user == request.user:
-        print("1")
-        print(request.POST)
         if "profile_edit_form_submit" in request.POST:
-            print("2_1")
             profile_edit_form = UserProfileInfoForm(
                 request.POST, request.FILES, instance=user_profile_info
             )
@@ -44,7 +41,6 @@ def user_profile(request, user_id=None):
                 profile_edit_form.save()
                 return redirect("social_app:user_profile", user_id=user_user.id)
         elif "post_form_submit" in request.POST:
-            print("2_2")
             post_form = PostForm(request.POST, request.FILES)
             if post_form.is_valid():
                 post = post_form.save(commit=False)
