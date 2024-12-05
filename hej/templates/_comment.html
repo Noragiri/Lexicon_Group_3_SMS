@@ -1,0 +1,22 @@
+<li class="list-group-item">
+    <p><strong>{{ comment.user.username }}</strong> <small class="text-muted">({{ comment.created_at|date:"F j, Y, g:i
+            a" }})</small></p>
+    <p>{{ comment.content }}</p>
+    <button class="btn btn-link reply-btn" data-toggle="collapse"
+        data-target="#replyForm{{ comment.id }}">Reply</button>
+    <div class="collapse" id="replyForm{{ comment.id }}">
+        <form method="post" class="mt-2">
+            {% csrf_token %}
+            {{ comment_form.as_p }}
+            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+            <button type="submit" class="btn btn-primary">Post Reply</button>
+        </form>
+    </div>
+    {% if comment.replies.all %}
+    <ul class="list-group list-group-flush ml-4">
+        {% for reply in comment.replies.all %}
+        {% include "_comment.html" with comment=reply %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</li>
