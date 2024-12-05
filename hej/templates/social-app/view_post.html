@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="post-detail">
-    <h1>Post by {{ post.user.user.username }}</h1>
+    <h1>Post by : {{ post.user }}</h1>
     <p><strong>Created at:</strong> {{ post.created_at }}</p>
     <div class="post-content">
         <p>{{ post.content }}</p>
