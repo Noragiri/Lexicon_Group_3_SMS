@@ -13,9 +13,9 @@
 					<a href="{% url 'social_app:my_user_profile' %}" class="nav-link px-2 link-body-emphasis">Profile</a>
 				</li>
 				<li>
-					<a href="{% url 'social_app:my_following' %}" class="nav-link px-2 link-body-emphasis">Following</a>
+					<a href="{% url 'social_app:following' %}" class="nav-link px-2 link-body-emphasis">Following</a>
 				</li>
-				<li><a href="{% url 'social_app:my_followers' %}" class="nav-link px-2 link-body-emphasis">Followers</a></li>
+				<li><a href="{% url 'social_app:followers' %}" class="nav-link px-2 link-body-emphasis">Followers</a></li>
 			</ul>
 			<!-- Search form -->
 			<form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3 d-flex" role="search" action="{% url 'social_app:search_user' %}" method="get">
@@ -25,9 +25,7 @@
 
 			<!-- User profile -->
 			<div class="dropdown text-end">
-				<a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-					<img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle" />
-				</a>
+				<a href="#" class="d-block link-body-emphasis text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"> <img src="{{ current_user_profile_info.profile_pic.url }}" width="32" height="32" class="rounded-circle" /> </a>
 				<ul class="dropdown-menu text-small" style="">
 					{% if request.user.is_authenticated %}
 					<li class="dropdown-item"><a class="nav-link" href="{% url 'social_app:logout' %}">Logout</a></li>
