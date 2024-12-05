@@ -1,3 +1,5 @@
+""" Models for the social_app app """
+
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -19,16 +21,24 @@ class UserProfile(models.Model):
         return self.user.username
 
 
-# Now define Follow model using a string reference to UserProfile
-class Follow(models.Model):
-    user = models.ForeignKey(User, related_name='followers', on_delete=models.CASCADE)
+class UserFollow(models.Model):
+    """Model representing a user following another user"""
+
+    # The user who is following
     follower = models.ForeignKey(
-        UserProfile, related_name="following", on_delete=models.CASCADE
+        User, related_name="following", on_delete=models.CASCADE
     )
-    following = models.ForeignKey(User, related_name='following', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+
+    # The user who is being followed
+    user_being_followed = models.ForeignKey(
+        User, related_name="followers", on_delete=models.CASCADE
+    )
+
+    objects = models.Manager()
+
     def __str__(self):
-        return f"{self.user.username} follows {self.following.username}"
+        """String for representing the Follow object"""
+        return f"{self.follower} follows {self.user_being_followed}"
 
 
 class Post(models.Model):

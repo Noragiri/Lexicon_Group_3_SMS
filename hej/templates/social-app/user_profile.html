@@ -9,10 +9,11 @@
 	<div class="alert alert-info" role="alert">Just to show that this is my own profile</div>
 	{% endif %}
 
-	{% if this_is_me %}
-	<a href="{% url 'social_app:follow_user' %}">Follow</a>
-
-	{% endif %}
+	<div>
+		{% if not this_is_me %}
+		<a href="/follow/{{user_id}}/">Follow</a>
+		{% endif %}
+	</div>
 
 	<!-- Profile Header -->
 	<div class="row align-items-center">
@@ -47,15 +48,13 @@
 						<div class="row g-3">
 							<div class="col-auto">
 								{% if profile_pic %}
-								<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
-								style="width: 40px; height: 40px;" />
+								<img src="{{ profile_pic }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle" style="width: 40px; height: 40px" />
 								{% else %}
-								<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
-								style="width: 40px; height: 40px;" />
+								<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 40px; height: 40px" />
 								{% endif %}
 							</div>
 							<div class="col-auto">
-								 <p class="card-text"><strong>{{username}}</strong></p>
+								<p class="card-text"><strong>{{username}}</strong></p>
 							</div>
 						</div>
 					</div>
@@ -74,11 +73,9 @@
 								<li class="list-group-item">
 									<!-- for profile pic -->
 									{% if comment_data.comment.user.userprofile.profile_pic %}
-									<img src="{{  comment_data.comment.user.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
-									style="width: 20px; height: 20px;" />
+									<img src="{{  comment_data.comment.user.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle" style="width: 20px; height: 20px" />
 									{% else %}
-									<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
-									style="width: 20px; height: 20px;" />
+									<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 20px; height: 20px" />
 									{% endif %}
 									<!-- for profile pic -END -->
 									<strong>{{ comment_data.comment.user.username }}</strong>: {{ comment_data.comment.content }}
@@ -92,11 +89,9 @@
 										<li class="list-group-item">
 											<!-- for profile pic -->
 											{% if reply.user.userprofile.profile_pic %}
-											<img src="{{  reply.user.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle"
-											style="width: 20px; height: 20px;" />
+											<img src="{{  reply.user.userprofile.profile_pic.url }}" alt="{{ username }}'s Profile Picture" class="img-fluid rounded-circle" style="width: 20px; height: 20px" />
 											{% else %}
-											<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle"
-											style="width: 20px; height: 20px;" />
+											<img src="{% static 'img/user-icon.png' %}" alt="Default Profile Picture" class="img-fluid rounded-circle" style="width: 20px; height: 20px" />
 											{% endif %}
 											<!-- for profile pic -END -->
 											<strong>{{ reply.user.username }}</strong>: {{ reply.content }}
